@@ -15,8 +15,12 @@ class User_model extends CI_Model
     {
         if (!$record) return;
         if (!empty($record['password'])) $record['password'] = password_hash($record['password'], PASSWORD_DEFAULT);
-
         $data = $this->extract($record);
+
+        if($this->user->where(['username' => $record['username']])->row()){
+            $this->session->set_flashdata('error_message', "@".$record['username']." has been taken!");
+            return false;
+        }
 
         if ($this->db->insert($this->table, $data)) {
             $this->uploadPhoto($this->db->insert_id());
