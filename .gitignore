@@ -1,0 +1,7 @@
+/vendor
+/node_modules
+/application/config/database.php
+/application/config/config.php
+.vscode
+/uploads
+index.php
