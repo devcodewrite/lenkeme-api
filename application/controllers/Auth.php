@@ -48,6 +48,7 @@ class Auth extends CI_Controller
     {
         $record = inputJson();
         $user  = $this->user->create($record);
+        $error = $this->session->flashdata('error_message');
         if ($user) {
             $out = [
                 'data' => $user,
@@ -58,7 +59,7 @@ class Auth extends CI_Controller
         } else {
             $out = [
                 'status' => false,
-                'message' => "Users couldn't be created!"
+                'message' => $error?$error:"Users couldn't be created!"
             ];
         }
 
