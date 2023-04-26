@@ -17,12 +17,12 @@ class User_model extends CI_Model
         if (!empty($record['password'])) $record['password'] = password_hash($record['password'], PASSWORD_DEFAULT);
         $data = $this->extract($record);
 
-        if($this->user->or_where(['username' => $record['username']])->row()){
+        if($this->user->where(['username' => $record['username']])->row()){
             $this->session->set_flashdata('error_message', "@".$record['username']." has been taken!");
             return false;
         }
 
-        if($this->user->or_where(['phone' => $record['phone']])->row()){
+        if($this->user->where(['phone' => $record['phone']])->row()){
             $pat1 = substr($record['phone'], 0,2);
             $pat2 = substr($record['phone'], 8,2);
             $this->session->set_flashdata('error_message', "You already have account with this phone number $pat1***$pat2");
