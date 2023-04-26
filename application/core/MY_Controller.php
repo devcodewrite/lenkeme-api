@@ -2,14 +2,6 @@
 
 class MY_Controller extends CI_Controller
 {
-    function __construct()
-    {
-        parent::__construct();
-        if (!auth()->authorized()) {
-            httpReponseError('Unauthorized Access!', 401);
-        }
-    }
-
     public function _remap($method, $params = array())
     {
         if (auth()->checkPermissions(uri_string())) {

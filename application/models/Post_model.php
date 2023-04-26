@@ -123,8 +123,9 @@ class Post_model extends CI_Model
     }
 
     public function canCreate($user){
-        return auth()->allow();
-
+        if (!auth()->authorized()) {
+            httpReponseError('Unauthorized Access!', 401);
+        }
         $role = $this->user->find($user->id)->role;
         if ($role)
             return
@@ -135,7 +136,9 @@ class Post_model extends CI_Model
     }
 
     public function canUpdate($user, $model){
-        return auth()->allow();
+        if (!auth()->authorized()) {
+            httpReponseError('Unauthorized Access!', 401);
+        }
 
         $role = $this->user->find($user->id)->role;
         if ($role)
@@ -147,7 +150,9 @@ class Post_model extends CI_Model
     }
 
     public function canDelete($user, $model){
-        return auth()->allow();
+        if (!auth()->authorized()) {
+            httpReponseError('Unauthorized Access!', 401);
+        }
 
         $role = $this->user->find($user->id)->role;
         if ($role)

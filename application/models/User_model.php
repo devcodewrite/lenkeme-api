@@ -202,6 +202,8 @@ class User_model extends CI_Model
 
     public function canCreate($user)
     {
+        return auth()->allow();
+
         $role = $this->user->find($user->id)->role;
         if ($role)
             return
@@ -213,6 +215,9 @@ class User_model extends CI_Model
 
     public function canUpdate($user, $model)
     {
+        if (!auth()->authorized()) {
+            httpReponseError('Unauthorized Access!', 401);
+        }
         $role = $this->user->find($user->id)->role;
         if ($role)
             return
@@ -224,6 +229,10 @@ class User_model extends CI_Model
 
     public function canDelete($user, $model)
     {
+        if (!auth()->authorized()) {
+            httpReponseError('Unauthorized Access!', 401);
+        }
+        
         $role = $this->user->find($user->id)->role;
         if ($role)
             return
