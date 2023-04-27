@@ -21,8 +21,15 @@ class Auth extends CI_Controller
      */
     public function login()
     {
+        $username = inputJson('username');
+
+        if($this->isPhoneNumber($username)){
+            $user = $this->user->where(['phone' => $username])->row();
+            if($user) $username = $user->username;
+        }
+
         $user = auth()->loginUser(
-            inputJson('username'),
+            $username,
             inputJson('password')
         );
         if ($user) {
@@ -41,6 +48,10 @@ class Auth extends CI_Controller
         httpResponseJson($out);
     }
 
+    private function isPhoneNumber($username = null): bool
+    {
+        return preg_match('/^[0-9]{10}+$/', $username);
+    }
     /**
      * Store a resource
      * print json Response
