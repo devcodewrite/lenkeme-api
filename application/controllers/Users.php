@@ -57,7 +57,15 @@ class Users extends MY_Controller
 
             $query->where($where);
 
-            $out = json($query, $start, $length, $inputs);
+            $out = json($query, $start, $length, $inputs, function($item){
+                return (object)array_merge((array)$item, [ 
+                    'jobs'=>$this->job->all()
+                        ->join('user_jobs', 'user_jobs.job_id=jobs.id')
+                        ->where('user_jobs.user_id', $item->id)
+                        ->get()
+                        ->result()
+                ]);
+            });
             $out = array_merge($out, [
                 'input' => $this->input->get(),
             ]);
@@ -93,7 +101,15 @@ class Users extends MY_Controller
             $query->where($where)
             ->where('users.phone_verified_at !=', null);
 
-            $out = json($query, $start, $length, $inputs);
+            $out = json($query, $start, $length, $inputs, function($item){
+                return (object)array_merge((array)$item, [ 
+                    'jobs'=>$this->job->all()
+                        ->join('user_jobs', 'user_jobs.job_id=jobs.id')
+                        ->where('user_jobs.user_id', $item->id)
+                        ->get()
+                        ->result()
+                ]);
+            });
             $out = array_merge($out, [
                 'input' => $this->input->get(),
             ]);
