@@ -39,9 +39,22 @@ class Auth extends CI_Controller
                 'message' => 'You have logged in successfully!'
             ];
         } else {
+            $error_code = auth()->error_code();
+            if($error_code == 7){
+                $otp = random_int(1000, 9999);
+                $temp = 'Hi {$firstname}, your OTP code is: {$code}. Do not share this with anyone.';
+                $sms = $this->sms->sendPersonalised($temp, [
+                    [
+                        'phone' => $user->phone,
+                        'firstname' => $user->firstname,
+                        'code' => $otp
+                    ]
+                ]);
+                if ($sms->sent()) $this->user->update($user->id, ['otp_code' => $otp]);
+            }
             $out = [
                 'status' => false,
-                'code' => auth()->error_code(),
+                'code' => $error_code,
                 'message' => auth()->error()
             ];
         }
