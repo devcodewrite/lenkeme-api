@@ -12,18 +12,15 @@ class Userjob_model extends CI_Model
 
         $data = $this->extract($record);
 
-        if(isset($record['jobs'])){
+        if (isset($record['jobs'])) {
             $data2 = [];
-            foreach (explode(',',$record['jobs']) as $job_id) {
-                array_push($data2,array_merge($data, ['job_id' => $job_id]));
+            foreach (explode(',', $record['jobs']) as $job_id) {
+                array_push($data2, array_merge($data, ['job_id' => $job_id]));
             }
-            
-            $this->db->insert_batch($this->table, $data2);
-            return $this->find($record['user_id']);
+
+            return $this->db->insert_batch($this->table, $data2);
         }
-        if ($this->db->insert($this->table, $data)) {
-            return $this->find($record['user_id']);
-        }
+        return $this->db->insert($this->table, $data);
     }
 
     /**
@@ -51,7 +48,7 @@ class Userjob_model extends CI_Model
         $role = $this->find($id);
         if ($this->perm->delete($role->permission_id))
             return $this->db->delete($this->table, ['id' => $id]);
-        
+
         return false;
     }
 
@@ -79,23 +76,12 @@ class Userjob_model extends CI_Model
         if (!$id) return;
 
         $where = [
-            'user_id' => $id,
+            "{$this->table}.user_id" => $id,
         ];
-        $where = [];
-        $fields = [];
-
-        foreach ($this->db->field_data($this->job->table) as $field_data) {
-            if (in_array($field_data->name, $this->job->hidden)) continue; // skip hidden fields
-            array_push($fields, "{$this->job->table}.$field_data->name");
-        }
-
         $user_job = $this->all()
-            ->select($fields)
-            ->join('jobs', 'jobs.id=user_jobs.job_id')
             ->where($where)
             ->get()
             ->result();
-        if(!$user_job) return false;
         return $user_job;
     }
 
@@ -112,19 +98,20 @@ class Userjob_model extends CI_Model
      */
     public function all()
     {
-        $fields = [$this->table.'.*',];
-        foreach($this->db->field_data($this->user->table) as $field_data){
-            if(in_array($field_data->name,$this->user->hidden)) continue; // skip hidden fields
-            array_push($fields, "{$this->user->table}.$field_data->name");
+        $fields = [];
+
+        foreach ($this->db->field_data($this->job->table) as $field_data) {
+            if (in_array($field_data->name, $this->job->hidden)) continue; // skip hidden fields
+            array_push($fields, "{$this->job->table}.$field_data->name");
         }
 
-        return
-            $this->db->select($fields, true)
-            ->join('users', "users.id={$this->table}.user_id1")
-            ->from($this->table);
+        return $this->all()
+            ->select($fields)
+            ->join('jobs', 'jobs.id=user_jobs.job_id');
     }
 
-    public function canViewAny($user){
+    public function canViewAny($user)
+    {
         if (!auth()->authorized()) {
             httpReponseError('Unauthorized Access!', 401);
         }
@@ -132,25 +119,29 @@ class Userjob_model extends CI_Model
         return auth()->allow();
     }
 
-    public function canView($user, $model){
+    public function canView($user, $model)
+    {
         if (!auth()->authorized()) {
             httpReponseError('Unauthorized Access!', 401);
         }
         return auth()->allow();
     }
 
-    public function canCreate($user){
-         if (!auth()->authorized()) {
+    public function canCreate($user)
+    {
+        if (!auth()->authorized()) {
             httpReponseError('Unauthorized Access!', 401);
         }
         return auth()->allow();
     }
 
-    public function canUpdate($user, $model){ 
+    public function canUpdate($user, $model)
+    {
         return auth()->allow();
     }
 
-    public function canDelete($user, $model){
+    public function canDelete($user, $model)
+    {
         if (!auth()->authorized()) {
             httpReponseError('Unauthorized Access!', 401);
         }

@@ -24,7 +24,7 @@ class Finder extends MY_Controller
         ];
         
         $query->group_start();
-        $query->or_like('concat(jobs.title,"-",users.city,",",users.country)', $inputs['keywords'], 'both');
+        $query->or_like('concat(jobs.title,"-",user_jobs.location,",",users.city)', $inputs['keywords'], 'both');
         $query->group_end();
         unset($inputs['keywords']);
 
@@ -57,7 +57,7 @@ class Finder extends MY_Controller
         $inputs = $this->input->get();
 
         $query = $this->job->all()
-            ->select('concat(jobs.title,"-",users.city,",",users.country) as suggestion',true)
+            ->select('concat(jobs.title,"-",user_jobs.location,",",users.city) as suggestion',true)
             ->join('user_jobs', 'user_jobs.job_id=jobs.id')
             ->join('users', 'users.id=user_jobs.user_id');
 
