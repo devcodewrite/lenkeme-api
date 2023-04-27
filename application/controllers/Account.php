@@ -67,7 +67,8 @@ class Account extends MY_Controller
             } else {
                 $out = [
                     'status' => false,
-                    'message' => "User couldn't be updated!"
+                    'code' => 13,
+                    'message' => "User couldn't be made an artisan. Possible reason: jobs not selected or job are inactive."
                 ];
             }
         } else {
