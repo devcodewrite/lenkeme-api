@@ -108,6 +108,8 @@ class Auth_model extends CI_Model
           }
      
           if (password_verify($pass, $user->password)) {
+               $this->user->update($user->id, ['last_login_at' => date('Y-m-d H:i:s', strtotime('now Africa/Accra'))]);
+               
                return $this->user->all()->select(['token'])->where($where)->get()->row();
           }
           $this->session->set_flashdata('auth_error', "Invalid credentials");
