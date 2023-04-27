@@ -40,6 +40,12 @@ class Auth extends CI_Controller
             ];
         } else {
             $error_code = auth()->error_code();
+            $out = [
+                'status' => false,
+                'code' => $error_code,
+                'message' => auth()->error()
+            ];
+
             if($error_code == 7){
                 $user = $this->user->where(['username' => $username])->row();
                 $otp = random_int(1000, 9999);
@@ -52,12 +58,11 @@ class Auth extends CI_Controller
                     ]
                 ]);
                 if ($sms->sent()) $this->user->update($user->id, ['otp_code' => $otp]);
+                $out = array_merge($out, [
+                    'data'=> (object)['phone' => $user->phone]
+                ]);
             }
-            $out = [
-                'status' => false,
-                'code' => $error_code,
-                'message' => auth()->error()
-            ];
+            
         }
         httpResponseJson($out);
     }
