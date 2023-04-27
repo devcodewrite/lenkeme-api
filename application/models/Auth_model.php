@@ -61,7 +61,8 @@ class Auth_model extends CI_Model
           ];
           $user = $this->user->where($where)->row();
           if (!$user) {
-               $this->session->set_flashdata('auth_error', "This account doesn't exist! or its closed!");
+               $this->session->set_flashdata('auth_error', "This account doesn't exist! or its disabled!");
+               $this->session->set_flashdata('auth_error_code', 5);
                return false;
           }
           return $user;
@@ -85,20 +86,24 @@ class Auth_model extends CI_Model
           $user = $this->user->all()->select(['password','token'])->where($where)->get()->row();
           if (!$user) {
                $this->session->set_flashdata('auth_error', "This account doesn't exist!");
+               $this->session->set_flashdata('auth_error_code', 4);
                return false;
           }
           if($user->email_verified_at === null){
          //      $this->session->set_flashdata('auth_error', "Email is not verified. Check your email for your verification link and click on it to verify.");
+         //      $this->session->set_flashdata('auth_error_code', 6);
          //      return false;
           }
 
           if($user->phone_verified_at === null){
                $this->session->set_flashdata('auth_error', "Phone number is not verified!");
+               $this->session->set_flashdata('auth_error_code', 7);
                return false;
           }
 
           if($user->status === 'inactive'){
                $this->session->set_flashdata('auth_error', "This account is de-activated or suspended!");
+               $this->session->set_flashdata('auth_error_code', 8);
                return false;
           }
      
@@ -106,6 +111,7 @@ class Auth_model extends CI_Model
                return $this->user->all()->select(['token'])->where($where)->get()->row();
           }
           $this->session->set_flashdata('auth_error', "Invalid credentials");
+          $this->session->set_flashdata('auth_error_code',9);
 
           return false;
      }
@@ -113,6 +119,10 @@ class Auth_model extends CI_Model
      public function error()
      {
           return $this->session->flashdata('auth_error');
+     }
+     public function error_code()
+     {
+          return $this->session->flashdata('auth_error_code');
      }
 }
 

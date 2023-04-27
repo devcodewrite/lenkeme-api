@@ -114,8 +114,47 @@ class Users extends MY_Controller
     {
         $gate = auth()->can('update', 'user', $this->user->find($id));
         if ($gate->allowed()) {
-            $record = $this->input->post();
+            $record = inputJson();
             $user = $this->user->update($id, $record);
+            if ($user) {
+                $out = [
+                    'data' => $user,
+                    'input' => $record,
+                    'status' => true,
+                    'message' => 'User updated successfully!'
+                ];
+            } else {
+                $out = [
+                    'status' => false,
+                    'message' => "User couldn't be updated!"
+                ];
+            }
+        } else {
+            $out = [
+                'status' => false,
+                'message' => $gate->message
+            ];
+        }
+
+        httpResponseJson($out);
+    }
+
+    /**
+     * Update a resource
+     * print json Response
+     */
+    public function make_artisan(int $id = null)
+    {
+        $gate = auth()->can('update', 'user', $this->user->find($id));
+        if ($gate->allowed()) {
+            $record = inputJson();
+            $userjobs = $this->userjob->create($record);
+            $user = false;
+            $jobsCount = sizeof($userjobs);
+
+            if ($jobsCount > 0)
+                $user = $this->user->update($id, $record);
+
             if ($user) {
                 $out = [
                     'data' => $user,
@@ -167,13 +206,15 @@ class Users extends MY_Controller
         httpResponseJson($out);
     }
 
-     /**
+    /**
      * Show a list of post resources
      * @return http json
      */
     public function my_posts()
     {
-
+        if (!auth()->authorized()) {
+            httpReponseError('Unauthorized Access!', 401);
+        }
         $gate = auth()->can('viewAny', 'post');
         if ($gate->denied()) {
             $out = [
@@ -204,12 +245,52 @@ class Users extends MY_Controller
         httpResponseJson($out);
     }
 
-     /**
+    /**
+     * Show a list of post resources
+     * @return http json
+     */
+    public function my_jobs()
+    {
+        if (!auth()->authorized()) {
+            httpReponseError('Unauthorized Access!', 401);
+        }
+        $gate = auth()->can('viewAny', 'job');
+        if ($gate->denied()) {
+            $out = [
+                'status' => false,
+                'message' => $gate->message
+            ];
+            httpReponseError($out, 401);
+            return;
+        }
+        $user = auth()->user();
+
+        $start = inputJson('start', 0);
+        $length = inputJson('length', 100);
+        $inputs = inputJson();
+        $query = $this->job->all()
+            ->select(['location'])
+            ->join('user_jobs', 'user_jobs.job_id=jobs.id');
+
+        $where = ['user_jobs.user_id' => $user->id];
+        $query->where($where);
+
+        $out = json($query, $start, $length, $inputs);
+        $out = array_merge($out, [
+            'input' => $this->input->get(),
+        ]);
+        httpResponseJson($out);
+    }
+
+    /**
      * Show a list of fav resources
      * @return http json
      */
     public function my_favourites()
     {
+        if (!auth()->authorized()) {
+            httpReponseError('Unauthorized Access!', 401);
+        }
         $gate = auth()->can('viewAny', 'favourite');
         if ($gate->denied()) {
             $out = [
@@ -224,9 +305,9 @@ class Users extends MY_Controller
         $start = inputJson('start', 0);
         $length = inputJson('length', 100);
         $inputs = inputJson();
-        
+
         $query = $this->favourite->all();
-        
+
         $where = ['user_id' => $user->id];
 
         $query->where($where);

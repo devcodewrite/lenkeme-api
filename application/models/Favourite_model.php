@@ -117,63 +117,30 @@ class Favourite_model extends CI_Model
         }
 
         return auth()->allow();
-        $role = $this->user->find($user->id)->role;
-        if ($role)
-            return
-                $role->permission->is_admin === '1'
-                ? auth()->allow() : (in_array('view', explode(',', $role->permission->user_favourites))?auth()->allow()
-                :auth()->deny("You don't have permission to view this recored."));
-        return auth()->deny("You don't have permission to view this recored.");
     }
 
     public function canView($user, $model){
         if (!auth()->authorized()) {
             httpReponseError('Unauthorized Access!', 401);
         }
-        $role = $this->user->find($user->id)->role;
-        if ($role)
-            return
-                $role->permission->is_admin === '1'
-                ? auth()->allow() : (in_array('view', explode(',', $role->permission->user_favourites))?auth()->allow()
-                :auth()->deny("You don't have permission to view this recored."));
-        return auth()->deny("You don't have permission to view this recored.");
+        return auth()->allow();
     }
 
     public function canCreate($user){
          if (!auth()->authorized()) {
             httpReponseError('Unauthorized Access!', 401);
         }
-
-        $role = $this->user->find($user->id)->role;
-        if ($role)
-            return
-                $role->permission->is_admin === '1'
-                ? auth()->allow() : (in_array('create', explode(',', $role->permission->user_favourites))?auth()->allow()
-                :auth()->deny("You don't have permission to create this record."));
-        return auth()->deny("You don't have permission to create this record.");
+        return auth()->allow();
     }
 
-    public function canUpdate($user, $model){
-        $role = $this->user->find($user->id)->role;
-        if ($role)
-            return
-                $role->permission->is_admin === '1'
-                ? auth()->allow() : (in_array('update', explode(',', $role->permission->user_favourites))?auth()->allow()
-                :auth()->deny("You don't have permission to update this record."));
-        return auth()->deny("You don't have permission to update this record.");
+    public function canUpdate($user, $model){ 
+        return auth()->allow();
     }
 
     public function canDelete($user, $model){
         if (!auth()->authorized()) {
             httpReponseError('Unauthorized Access!', 401);
         }
-        
-        $role = $this->user->find($user->id)->role;
-        if ($role)
-            return
-                $role->permission->is_admin === '1'
-                ? auth()->allow() : (in_array('delete', explode(',', $role->permission->user_favourites))?auth()->allow()
-                :auth()->deny("You don't have permission to delete this record."));
-        return auth()->deny("You don't have permission to delete this record.");
+        return auth()->allow();
     }
 }

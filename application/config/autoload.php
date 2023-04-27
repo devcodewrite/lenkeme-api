@@ -139,6 +139,7 @@ $autoload['model'] = array(
     'permission_model' => 'perm',
     'user_model' => 'user',
     'favourite_model' => 'favourite',
+    'userjob_model' => 'userjob',
     'post_model' => 'post',
     'job_model' => 'job',
     'sysuser_model' => 'sysuser',

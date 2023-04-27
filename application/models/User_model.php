@@ -7,6 +7,7 @@ class User_model extends CI_Model
 
     public $hidden = [
         'token',
+        'otp_code',
         'password',
         'deleted_at'
     ];
@@ -14,19 +15,31 @@ class User_model extends CI_Model
     public function create(array $record)
     {
         if (!$record) return;
+        $record['token'] = sha1($record['password'].uniqid());
         if (!empty($record['password'])) $record['password'] = password_hash($record['password'], PASSWORD_DEFAULT);
+       
         $data = $this->extract($record);
 
-        if($this->user->where(['username' => $record['username']])->row()){
-            $this->session->set_flashdata('error_message', "@".$record['username']." has been taken!");
+        if ($this->user->where(['username' => $record['username']])->row()) {
+            $this->session->set_flashdata('error_message', "@" . $record['username'] . " has been taken!");
+            $this->session->set_flashdata('error_code', 1);
             return false;
         }
 
-        if($this->user->where(['phone' => $record['phone']])->row()){
-            $pat1 = substr($record['phone'], 0,2);
-            $pat2 = substr($record['phone'], 8,2);
+        if ($this->user->where(['phone' => $record['phone']])->row()) {
+            $pat1 = substr($record['phone'], 0, 2);
+            $pat2 = substr($record['phone'], 8, 2);
             $this->session->set_flashdata('error_message', "You already have account with this phone number $pat1***$pat2");
+            $this->session->set_flashdata('error_code', 2);
             return false;
+        }
+
+        if (isset($record['email'])) {
+            if ($this->user->where(['email' => $record['email']])->row()) {
+                $this->session->set_flashdata('error_message', "You already have account with this email ".$record['email']);
+                $this->session->set_flashdata('error_code', 3);
+                return false;
+            }
         }
 
         if ($this->db->insert($this->table, $data)) {
@@ -47,15 +60,15 @@ class User_model extends CI_Model
 
         if (!empty($record['password'])) {
             $record['password'] = password_hash($record['password'], PASSWORD_DEFAULT);
-        }else{
+        } else {
             unset($record['password']);
         }
-            $data = $this->extract($record);
-            $this->db->set($data);
-            $this->db->where('id', $id);
-            $this->db->update($this->table);
-            $this->uploadPhoto($id);
-        
+        $data = $this->extract($record);
+        $this->db->set($data);
+        $this->db->where('id', $id);
+        $this->db->update($this->table);
+        $this->uploadPhoto($id);
+
         return $this->find($id);
     }
 
@@ -162,16 +175,15 @@ class User_model extends CI_Model
     public function all()
     {
         $where = ["{$this->table}.deleted_at =" => null];
-        $fields = [
-        ];
-       
-        foreach($this->db->field_data($this->table) as $field_data){
-            if(in_array($field_data->name,$this->hidden)) continue; // skip hidden fields
+        $fields = [];
+
+        foreach ($this->db->field_data($this->table) as $field_data) {
+            if (in_array($field_data->name, $this->hidden)) continue; // skip hidden fields
             array_push($fields, "{$this->table}.$field_data->name");
         }
 
         return
-            $this->db->select($fields,true)
+            $this->db->select($fields, true)
             ->from($this->table)
             ->where($where);
     }
@@ -179,38 +191,16 @@ class User_model extends CI_Model
     public function canViewAny($user)
     {
         return auth()->allow();
-        $role = $this->user->find($user->id)->role;
-        if ($role)
-            return
-                $role->permission->is_admin === '1'
-                ? auth()->allow() : (in_array('view', explode(',', $role->permission->users)) ? auth()->allow()
-                    : auth()->deny("You don't have permission to view this recored."));
-        return auth()->deny("You don't have permission to view this recored.");
     }
 
     public function canView($user, $model)
     {
         return auth()->allow();
-        $role = $this->user->find($user->id)->role;
-        if ($role)
-            return
-                $role->permission->is_admin === '1'
-                ? auth()->allow() : (in_array('view', explode(',', $role->permission->users)) ? auth()->allow()
-                    : auth()->deny("You don't have permission to view this recored."));
-        return auth()->deny("You don't have permission to view this recored.");
     }
 
     public function canCreate($user)
     {
         return auth()->allow();
-
-        $role = $this->user->find($user->id)->role;
-        if ($role)
-            return
-                $role->permission->is_admin === '1'
-                ? auth()->allow() : (in_array('create', explode(',', $role->permission->users)) ? auth()->allow()
-                    : auth()->deny("You don't have permission to create this record."));
-        return auth()->deny("You don't have permission to create this record.");
     }
 
     public function canUpdate($user, $model)
@@ -218,13 +208,7 @@ class User_model extends CI_Model
         if (!auth()->authorized()) {
             httpReponseError('Unauthorized Access!', 401);
         }
-        $role = $this->user->find($user->id)->role;
-        if ($role)
-            return
-                $role->permission->is_admin === '1'
-                ? auth()->allow() : (in_array('update', explode(',', $role->permission->users)) ? auth()->allow()
-                    : auth()->deny("You don't have permission to update this record."));
-        return auth()->deny("You don't have permission to update this record.");
+        return auth()->allow();
     }
 
     public function canDelete($user, $model)
@@ -232,13 +216,6 @@ class User_model extends CI_Model
         if (!auth()->authorized()) {
             httpReponseError('Unauthorized Access!', 401);
         }
-        
-        $role = $this->user->find($user->id)->role;
-        if ($role)
-            return
-                $role->permission->is_admin === '1'
-                ? auth()->allow() : (in_array('delete', explode(',', $role->permission->users)) ? auth()->allow()
-                    : auth()->deny("You don't have permission to delete this record."));
-        return auth()->deny("You don't have permission to delete this record.");
+        return auth()->allow();
     }
 }

@@ -3,7 +3,11 @@ defined('BASEPATH') or exit('Direct acess is not allowed');
 
 class Job_model extends CI_Model
 {
-    protected $table = 'jobs';
+    public $table = 'jobs';
+
+    public $hidden = [
+        'deleted_at'
+    ];
 
     public function create(array $record)
     {
@@ -91,7 +95,14 @@ class Job_model extends CI_Model
      */
     public function all()
     {
+        $where = ["{$this->table}.deleted_at =" => null];
         $fields = [];
+
+        foreach ($this->db->field_data($this->table) as $field_data) {
+            if (in_array($field_data->name, $this->hidden)) continue; // skip hidden fields
+            array_push($fields, "{$this->table}.$field_data->name");
+        }
+
         return
             $this->db->select($fields, true)
             ->from($this->table);
@@ -99,64 +110,30 @@ class Job_model extends CI_Model
 
     public function canViewAny($user){
         return auth()->allow();
-
-        $role = $this->user->find($user->id)->role;
-        if ($role)
-            return
-                $role->permission->is_admin === '1'
-                ? auth()->allow() : (in_array('view', explode(',', $role->permission->jobs))?auth()->allow()
-                :auth()->deny("You don't have permission to view this recored."));
-        return auth()->deny("You don't have permission to view this recored.");
     }
 
     public function canView($user, $model){
         return auth()->allow();
-
-        $role = $this->user->find($user->id)->role;
-        if ($role)
-            return
-                $role->permission->is_admin === '1'
-                ? auth()->allow() : (in_array('view', explode(',', $role->permission->jobs))?auth()->allow()
-                :auth()->deny("You don't have permission to view this recored."));
-        return auth()->deny("You don't have permission to view this recored.");
     }
 
     public function canCreate($user){
         if (!auth()->authorized()) {
             httpReponseError('Unauthorized Access!', 401);
         }
-        $role = $this->user->find($user->id)->role;
-        if ($role)
-            return
-                $role->permission->is_admin === '1'
-                ? auth()->allow() : (in_array('create', explode(',', $role->permission->jobs))?auth()->allow()
-                :auth()->deny("You don't have permission to create this record."));
-        return auth()->deny("You don't have permission to create this record.");
+        return auth()->allow();
     }
 
     public function canUpdate($user, $model){
         if (!auth()->authorized()) {
             httpReponseError('Unauthorized Access!', 401);
         }
-        $role = $this->user->find($user->id)->role;
-        if ($role)
-            return
-                $role->permission->is_admin === '1'
-                ? auth()->allow() : (in_array('update', explode(',', $role->permission->jobs))?auth()->allow()
-                :auth()->deny("You don't have permission to update this record."));
-        return auth()->deny("You don't have permission to update this record.");
+        return auth()->allow();
     }
 
     public function canDelete($user, $model){
         if (!auth()->authorized()) {
             httpReponseError('Unauthorized Access!', 401);
         }
-        $role = $this->user->find($user->id)->role;
-        if ($role)
-            return
-                $role->permission->is_admin === '1'
-                ? auth()->allow() : (in_array('delete', explode(',', $role->permission->jobs))?auth()->allow()
-                :auth()->deny("You don't have permission to delete this record."));
-        return auth()->deny("You don't have permission to delete this record.");
+        return auth()->allow();
     }
 }
