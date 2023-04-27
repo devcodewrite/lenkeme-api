@@ -55,14 +55,20 @@ class Auth_model extends CI_Model
 
      public function authorized()
      {
+          $token = $this->getHeaderToken();
           $where = [
                'status' => 'active',
-               'token' => $this->getHeaderToken(),
+               'token' => $token,
           ];
           $user = $this->user->where($where)->row();
           if (!$user) {
                $this->session->set_flashdata('auth_error', "This account doesn't exist! or its disabled!");
                $this->session->set_flashdata('auth_error_code', 5);
+               return false;
+          }
+          if (empty($token) || $token === null) {
+               $this->session->set_flashdata('auth_error', "Invalid access token!");
+               $this->session->set_flashdata('auth_error_code', 12);
                return false;
           }
           return $user;
@@ -109,7 +115,7 @@ class Auth_model extends CI_Model
      
           if (password_verify($pass, $user->password)) {
                $this->user->update($user->id, ['last_login_at' => date('Y-m-d H:i:s', strtotime('now Africa/Accra'))]);
-               
+
                return $this->user->all()->select(['token'])->where($where)->get()->row();
           }
           $this->session->set_flashdata('auth_error', "Invalid credentials");

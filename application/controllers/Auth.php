@@ -148,7 +148,7 @@ class Auth extends CI_Controller
         ];
 
         if($user->last_login_at === null){
-            $data = array_merge($data, ['status' => 'active']);
+            $data = array_merge($data, ['status' => 'active', 'token' => sha1($user->id.uniqid())]);
         }
       
         $user = $this->user->update($user->id, $data);
