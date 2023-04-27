@@ -16,7 +16,7 @@ if (!function_exists('datatable')) {
      * @param int $per_page number of results per page
      * @return array structure for json
      */
-    function json($query, int $start = 0, int $per_page = 10, $inputs = null)
+    function json($query, int $start = 0, int $per_page = 10, $inputs = null, $callback = null)
     {
         $ci = (object)get_instance();
         $take = $per_page;
@@ -34,15 +34,15 @@ if (!function_exists('datatable')) {
             }
 
             if ($inputs) {
-                if (isset($inputs['columns'])){
-                $ci->db->group_start();
+                if (isset($inputs['columns'])) {
+                    $ci->db->group_start();
                     foreach ($inputs['columns'] as $col) {
                         if (isset($col['name']) && isset($inputs['search']))
                             $ci->db->or_like($col['name'], $inputs['search']['value'], 'both');
                     }
-                $ci->db->group_end();
+                    $ci->db->group_end();
                 }
-                if (isset($inputs['order'])){
+                if (isset($inputs['order'])) {
                     foreach ($inputs['order'] as $order) {
                         $ci->db->order_by($inputs['columns'][$order['column']]['name'], $order['dir']);
                     }
@@ -53,23 +53,28 @@ if (!function_exists('datatable')) {
             $total = $query->get()->num_rows();
             $query = $ci->db->last_query();
             $result = $ci->db->query($query . " limit $start, $take");
-            return json_array($result, $total);
+            return json_array($result, $total, $callback);
         } else if (gettype($query) === 'string') {
             $result = $ci->db->query($query);
             $total = $result->num_rows();
             $result = $ci->db->query($query . " limit $start, $take");
-            return json_array($result, $total);
+            return json_array($result, $total, $callback);
         }
         throw new InvalidArgumentException('$query must be of type string or an instance of CI_DB_driver', 0);
     }
 
-    function json_array(CI_DB_mysqli_result $result, $total)
+    function json_array(CI_DB_mysqli_result $result, $total, $callback = null)
     {
         if (!$result) return []; // for invalid result
+        $result2 = [];
+        if ($callback)
+            foreach ($result->result() as $key => $item) {
+                array_push($result2, $callback($item));
+            }
         $data = [
             'recordsTotal' => $total,
             'recordsFiltered' => $total,
-            'data' => $result->result(),
+            'data' => $callback ? $result2 : $result->result(),
         ];
         return $data;
     }
