@@ -27,7 +27,7 @@ class Auth extends CI_Controller
             $user = $this->user->where(['phone' => $username])->row();
             if($user) $username = $user->username;
         }
-        die($username);
+       
         $user = auth()->loginUser(
             $username,
             inputJson('password')
