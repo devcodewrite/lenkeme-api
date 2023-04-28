@@ -16,12 +16,12 @@ class Userjob_model extends CI_Model
             $data2 = [];
             $jobs = explode(',', $record['jobs']) ;
             foreach ($jobs as $job_id) {
-                array_push($data2, array_merge($data, ['job_id' => $job_id]));
-                if($this->where(['job_id' => $job_id])->num_rows() === 0){
+                if($this->job->where(['id' => $job_id])->num_rows() === 0){
                     $this->session->set_flashdata('error_message', "Job id: $job_id wasn't not found!");
                     $this->session->set_flashdata('error_code', 14);
                     return false;
                 }
+                array_push($data2, array_merge($data, ['job_id' => $job_id]));
             }
             return $this->db->insert_batch($this->table, $data2);
         }
