@@ -16,10 +16,10 @@ if (!function_exists('datatable')) {
      * @param int $per_page number of results per page
      * @return array structure for json
      */
-    function json($query, int $start = 0, int $per_page = 10, $inputs = null, $callback = null)
+    function json($query, int $start = 0, $per_page = 10, $inputs = null, $callback = null)
     {
         $ci = (object)get_instance();
-        $take = $per_page;
+        $take = intval($per_page);
         $total = 0;
 
         if ($query instanceof CI_DB_driver) {
