@@ -45,7 +45,7 @@ if (!function_exists('datatable')) {
                 }
                 if (isset($inputs['order'])) {
                     foreach ($inputs['order'] as $order) {
-                        $ci->db->order_by($inputs['columns'][$order['column']]['name'], $order['dir']);
+                        $ci->db->order_by($inputs['columns'][intval($order['column'])]['name'], $order['dir']);
                     }
                 }
             }
