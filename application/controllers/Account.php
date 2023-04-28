@@ -130,9 +130,9 @@ class Account extends MY_Controller
         }
         $user = auth()->user();
 
-        $start = inputJson('start', 0);
-        $length = inputJson('length', 100);
-        $inputs = inputJson();
+        $start = $this->input->get('start');
+        $length = $this->input->get('length');
+        $inputs = $this->input->get();
         $query = $this->post->all();
 
         $where = ['user_id' => $user->id];
@@ -166,9 +166,9 @@ class Account extends MY_Controller
         }
         $user = auth()->user();
 
-        $start = inputJson('start', 0);
-        $length = inputJson('length', 100);
-        $inputs = inputJson();
+        $start = $this->input->get('start');
+        $length = $this->input->get('length');
+        $inputs = $this->input->get();
         $query = $this->job->all()
             ->select(['location'])
             ->join('user_jobs', 'user_jobs.job_id=jobs.id');
@@ -200,9 +200,9 @@ class Account extends MY_Controller
         }
         $user = auth()->user();
 
-        $start = inputJson('start', 0);
-        $length = inputJson('length', 100);
-        $inputs = inputJson();
+        $start = $this->input->get('start');
+        $length = $this->input->get('length');
+        $inputs = $this->input->get();
         $query = $this->favourite->all();
         $where = ['user_id' => $user->id];
 

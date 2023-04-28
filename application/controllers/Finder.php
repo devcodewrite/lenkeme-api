@@ -10,8 +10,8 @@ class Finder extends MY_Controller
      */
     public function find_artisans()
     {
-        $start = inputJson('start', 0);
-        $length = inputJson('length', 100);
+        $start = $this->input->get('start');
+        $length = $this->input->get('length');
         $inputs = $this->input->get();
 
         $query = $this->user->all()
@@ -81,7 +81,7 @@ class Finder extends MY_Controller
     public function suggest_artisans()
     {
 
-        $start = inputJson('start', 0);
+        $start = $this->input->get('start');
         $length = inputJson('length', 20);
         $inputs = $this->input->get();
 

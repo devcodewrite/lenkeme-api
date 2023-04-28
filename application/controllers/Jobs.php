@@ -43,9 +43,9 @@ class jobs extends MY_Controller
                 return;
             }
 
-            $start = inputJson('start', 0);
-            $length = inputJson('length', 100);
-            $inputs = inputJson();
+            $start = $this->input->get('start');
+            $length = $this->input->get('length');
+            $inputs = $this->input->get();
             $query = $this->job->all();
 
             $where = [];
