@@ -56,7 +56,7 @@ class Account extends MY_Controller
             
             if ($this->userjob->create($record))
                 $user = $this->user->update($user->id, ['user_type' => 'artisan']);
-
+                $user->jobs = $this->userjob->find($user->id)->result();
             if ($user) {
                 $out = [
                     'data' => $user,
