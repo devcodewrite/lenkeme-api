@@ -35,7 +35,7 @@ if (!function_exists('datatable')) {
             }
 
             if ($inputs) {
-                if (isset($inputs['columns'])) {
+                if (isset($inputs['columns']) && isset($inputs['search'])) {
                     $ci->db->group_start();
                     foreach ($inputs['columns'] as $col) {
                         if (isset($col['name']) && isset($inputs['search']))
