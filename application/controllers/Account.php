@@ -67,7 +67,7 @@ class Account extends MY_Controller
                 ];
             } else {
                 $error = $this->session->flashdata('error_message');
-                $error_code = $this->session->flashdata('error_message');
+                $error_code = $this->session->flashdata('error_code');
                 $out = [
                     'status' => false,
                     'code' => $error_code?$error_code:13,
