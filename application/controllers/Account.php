@@ -53,12 +53,12 @@ class Account extends MY_Controller
         $gate = auth()->can('update', 'user', $user);
         if ($gate->allowed()) {
             $record = inputJson();
-            
-            if ($this->userjob->create($record)){
+            $userjobs = $this->userjob->create($record);
+            if ($userjobs){
                 $user = $this->user->update($user->id, ['user_type' => 'artisan']);
                 if($user) $user->jobs = $this->userjob->find($user->id)->result();
             }
-            if ($user) {
+            if ($userjobs) {
                 $out = [
                     'data' => $user,
                     'input' => $record,
@@ -66,10 +66,12 @@ class Account extends MY_Controller
                     'message' => 'User updated successfully!'
                 ];
             } else {
+                $error = $this->session->flashdata('error_message');
+                $error_code = $this->session->flashdata('error_message');
                 $out = [
                     'status' => false,
-                    'code' => 13,
-                    'message' => "User couldn't be made an artisan. Possible reason: jobs not selected or job are inactive."
+                    'code' => $error_code?$error_code:13,
+                    'message' => $error?$error:"User couldn't be made an artisan. Possible reason: jobs not selected or job are inactive."
                 ];
             }
         } else {
