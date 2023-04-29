@@ -51,7 +51,14 @@ class Posts extends MY_Controller
             $where = [];
 
             if ($this->input->get('status'))
-                $where = array_merge($where, ['posts.status' => $inputs['status']]);
+                $where = array_merge($where, ['posts.status' => $inputs['status']], function ($item) {
+                    return (object)array_merge((array)$item, [
+                        'user' => $this->user->all()
+                            ->where('user_id', $item->id)
+                            ->get()
+                            ->row()
+                    ]);
+                });
 
             $query->where($where);
 
@@ -84,7 +91,7 @@ class Posts extends MY_Controller
             } else {
                 $out = [
                     'status' => false,
-                    'message' => $error?$error:"posts couldn't be created!"
+                    'message' => $error ? $error : "posts couldn't be created!"
                 ];
             }
         } else {
