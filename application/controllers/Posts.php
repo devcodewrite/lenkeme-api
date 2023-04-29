@@ -51,18 +51,18 @@ class Posts extends MY_Controller
             $where = [];
 
             if ($this->input->get('status'))
-                $where = array_merge($where, ['posts.status' => $inputs['status']], function ($item) {
-                    return (object)array_merge((array)$item, [
-                        'user' => $this->user->all()
-                            ->where('user_id', $item->user_id)
-                            ->get()
-                            ->row()
-                    ]);
-                });
+                $where = array_merge($where, ['posts.status' => $inputs['status']]);
 
             $query->where($where);
 
-            $out = json($query, $start, $length, $inputs);
+            $out = json($query, $start, $length, $inputs,function ($item) {
+                return (object)array_merge((array)$item, [
+                    'user' => $this->user->all()
+                        ->where('user_id', $item->user_id)
+                        ->get()
+                        ->row()
+                ]);
+            });
             $out = array_merge($out, [
                 'input' => $this->input->get(),
             ]);
