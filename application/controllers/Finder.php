@@ -108,9 +108,6 @@ class Finder extends MY_Controller
         $query->group_start();
         $query->or_like('jobs.title', $inputs['keywords'],  'both');
         $query->or_like('jobs.description', $inputs['keywords'],  'both');
-        $query->or_like('users.firstname', $inputs['keywords'],  'both');
-        $query->or_like('users.lastname', $inputs['keywords'],  'both');
-        $query->or_like('users.display_name', $inputs['keywords'],  'both');
         $query->or_like('users.city', $inputs['keywords'],  'both');
         $query->group_end();
         unset($inputs['keywords']);
