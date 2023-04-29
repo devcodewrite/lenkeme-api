@@ -54,7 +54,7 @@ class Posts extends MY_Controller
                 $where = array_merge($where, ['posts.status' => $inputs['status']], function ($item) {
                     return (object)array_merge((array)$item, [
                         'user' => $this->user->all()
-                            ->where('user_id', $item->id)
+                            ->where('user_id', $item->user_id)
                             ->get()
                             ->row()
                     ]);
