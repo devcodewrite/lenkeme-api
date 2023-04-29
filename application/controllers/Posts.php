@@ -55,10 +55,10 @@ class Posts extends MY_Controller
 
             $query->where($where);
 
-            $out = json($query, $start, $length, $inputs,function ($item) {
+            $out = json($query, $start, $length, $inputs, function ($item) {
                 return (object)array_merge((array)$item, [
                     'user' => $this->user->all()
-                        ->where('user_id', $item->user_id)
+                        ->where('id', $item->user_id)
                         ->get()
                         ->row()
                 ]);
