@@ -3,7 +3,8 @@ defined('BASEPATH') or exit('No direct script allowed');
 
 class Account extends MY_Controller
 {
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
         if (!auth()->authorized()) {
             httpReponseError('Unauthorized Access!', 401);
@@ -54,9 +55,9 @@ class Account extends MY_Controller
         if ($gate->allowed()) {
             $record = inputJson();
             $userjobs = $this->userjob->create($record);
-            if ($userjobs){
+            if ($userjobs) {
                 $user = $this->user->update($user->id, ['user_type' => 'artisan']);
-                if($user) $user->jobs = $this->userjob->find($user->id)->result();
+                if ($user) $user->jobs = $this->userjob->find($user->id)->result();
             }
             if ($userjobs) {
                 $out = [
@@ -70,8 +71,8 @@ class Account extends MY_Controller
                 $error_code = $this->session->flashdata('error_code');
                 $out = [
                     'status' => false,
-                    'code' => $error_code?$error_code:13,
-                    'message' => $error?$error:"User couldn't be made an artisan. Possible reason: jobs not selected or job are inactive."
+                    'code' => $error_code ? $error_code : 13,
+                    'message' => $error ? $error : "User couldn't be made an artisan. Possible reason: jobs not selected or job are inactive."
                 ];
             }
         } else {
@@ -143,9 +144,14 @@ class Account extends MY_Controller
         $query->where($where);
 
         $out = json($query, $start, $length, $inputs);
-        $out = array_merge($out, [
+        if ($out)
+            $out = array_merge($out, [
+                'input' => $this->input->get(),
+            ]);
+        else  $out = [
+            'status' => false,
             'input' => $this->input->get(),
-        ]);
+        ];
         httpResponseJson($out);
     }
 
@@ -177,9 +183,14 @@ class Account extends MY_Controller
         $query->where($where);
 
         $out = json($query, $start, $length, $inputs);
-        $out = array_merge($out, [
+        if ($out)
+            $out = array_merge($out, [
+                'input' => $this->input->get(),
+            ]);
+        else  $out = [
+            'status' => false,
             'input' => $this->input->get(),
-        ]);
+        ];
         httpResponseJson($out);
     }
 
@@ -209,9 +220,14 @@ class Account extends MY_Controller
         $query->where($where);
 
         $out = json($query, $start, $length, $inputs);
-        $out = array_merge($out, [
+        if ($out)
+            $out = array_merge($out, [
+                'input' => $this->input->get(),
+            ]);
+        else  $out = [
+            'status' => false,
             'input' => $this->input->get(),
-        ]);
+        ];
         httpResponseJson($out);
     }
 }

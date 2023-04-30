@@ -76,6 +76,7 @@ if (!function_exists('datatable')) {
             'recordsTotal' => $total,
             'recordsFiltered' => $result->num_rows(),
             'data' => $callback ? $result2 : $result->result(),
+            'status' => true,
         ];
         return $data;
     }

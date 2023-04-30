@@ -56,9 +56,14 @@ class jobs extends MY_Controller
             $query->where($where);
 
             $out = json($query, $start, $length, $inputs);
-            $out = array_merge($out, [
+            if ($out)
+                $out = array_merge($out, [
+                    'input' => $this->input->get(),
+                ]);
+            else  $out = [
+                'status' => false,
                 'input' => $this->input->get(),
-            ]);
+            ];
             httpResponseJson($out);
         }
     }

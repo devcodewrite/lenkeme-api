@@ -63,9 +63,14 @@ class Posts extends MY_Controller
                         ->row()
                 ]);
             });
-            $out = array_merge($out, [
+            if ($out)
+                $out = array_merge($out, [
+                    'input' => $this->input->get(),
+                ]);
+            else  $out = [
+                'status' => false,
                 'input' => $this->input->get(),
-            ]);
+            ];
             httpResponseJson($out);
         }
     }

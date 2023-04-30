@@ -57,18 +57,23 @@ class Users extends MY_Controller
 
             $query->where($where);
 
-            $out = json($query, $start, $length, $inputs, function($item){
-                return (object)array_merge((array)$item, [ 
-                    'jobs'=>$this->job->all()
+            $out = json($query, $start, $length, $inputs, function ($item) {
+                return (object)array_merge((array)$item, [
+                    'jobs' => $this->job->all()
                         ->join('user_jobs', 'user_jobs.job_id=jobs.id')
                         ->where('user_jobs.user_id', $item->id)
                         ->get()
                         ->result()
                 ]);
             });
-            $out = array_merge($out, [
+            if ($out)
+                $out = array_merge($out, [
+                    'input' => $this->input->get(),
+                ]);
+            else  $out = [
+                'status' => false,
                 'input' => $this->input->get(),
-            ]);
+            ];
             httpResponseJson($out);
         }
     }
@@ -79,42 +84,47 @@ class Users extends MY_Controller
      */
     public function artisans($id = null)
     {
-            $gate = auth()->can('viewAny', 'user');
-            if ($gate->denied()) {
-                $out = [
-                    'status' => false,
-                    'message' => $gate->message
-                ];
-                httpReponseError($out, 401);
-                return;
-            }
-
-            $start = $this->input->get('start');
-            $length = $this->input->get('length');
-           
-            $inputs = $this->input->get();
-            $query = $this->user->all();
-
-            $where = [
-                'users.status' => 'active',
-                'users.user_type' => 'artisan',
+        $gate = auth()->can('viewAny', 'user');
+        if ($gate->denied()) {
+            $out = [
+                'status' => false,
+                'message' => $gate->message
             ];
-            $query->where($where)
+            httpReponseError($out, 401);
+            return;
+        }
+
+        $start = $this->input->get('start');
+        $length = $this->input->get('length');
+
+        $inputs = $this->input->get();
+        $query = $this->user->all();
+
+        $where = [
+            'users.status' => 'active',
+            'users.user_type' => 'artisan',
+        ];
+        $query->where($where)
             ->where('users.phone_verified_at !=', null);
 
-            $out = json($query, $start, $length, $inputs, function($item){
-                return (object)array_merge((array)$item, [ 
-                    'jobs'=>$this->job->all()
-                        ->join('user_jobs', 'user_jobs.job_id=jobs.id')
-                        ->where('user_jobs.user_id', $item->id)
-                        ->get()
-                        ->result()
-                ]);
-            });
+        $out = json($query, $start, $length, $inputs, function ($item) {
+            return (object)array_merge((array)$item, [
+                'jobs' => $this->job->all()
+                    ->join('user_jobs', 'user_jobs.job_id=jobs.id')
+                    ->where('user_jobs.user_id', $item->id)
+                    ->get()
+                    ->result()
+            ]);
+        });
+        if ($out)
             $out = array_merge($out, [
                 'input' => $this->input->get(),
             ]);
-            httpResponseJson($out);
+        else  $out = [
+            'status' => false,
+            'input' => $this->input->get(),
+        ];
+        httpResponseJson($out);
     }
     /**
      * Show a list of post resources
@@ -154,9 +164,14 @@ class Users extends MY_Controller
         $query->where($where);
 
         $out = json($query, $start, $length, $inputs);
-        $out = array_merge($out, [
+        if ($out)
+            $out = array_merge($out, [
+                'input' => $this->input->get(),
+            ]);
+        else  $out = [
+            'status' => false,
             'input' => $this->input->get(),
-        ]);
+        ];
         httpResponseJson($out);
     }
 

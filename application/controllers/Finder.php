@@ -59,18 +59,23 @@ class Finder extends MY_Controller
         $query->group_end();
         $query->where($where);
 
-        $out = json($query, $start, $length, $inputs, function($item){
-            return (object)array_merge((array)$item, [ 
-                'jobs'=>$this->job->all()
+        $out = json($query, $start, $length, $inputs, function ($item) {
+            return (object)array_merge((array)$item, [
+                'jobs' => $this->job->all()
                     ->join('user_jobs', 'user_jobs.job_id=jobs.id')
                     ->where('user_jobs.user_id', $item->id)
                     ->get()
                     ->result()
             ]);
         });
-        $out = array_merge($out, [
+        if ($out)
+            $out = array_merge($out, [
+                'input' => $this->input->get(),
+            ]);
+        else  $out = [
+            'status' => false,
             'input' => $this->input->get(),
-        ]);
+        ];
         httpResponseJson($out);
     }
 
@@ -80,7 +85,6 @@ class Finder extends MY_Controller
      */
     public function suggest_artisans()
     {
-
         $start = $this->input->get('start');
         $length = inputJson('length', 20);
         $inputs = $this->input->get();
@@ -123,9 +127,14 @@ class Finder extends MY_Controller
         $query->where($where);
 
         $out = json($query, $start, $length, $inputs);
-        $out = array_merge($out, [
+        if ($out)
+            $out = array_merge($out, [
+                'input' => $this->input->get(),
+            ]);
+        else  $out = [
+            'status' => false,
             'input' => $this->input->get(),
-        ]);
+        ];
         httpResponseJson($out);
     }
 }
