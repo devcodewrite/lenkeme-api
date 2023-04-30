@@ -81,7 +81,9 @@ class Auth_model extends CI_Model
 
      public function getHeaderToken()
      {
-          return explode(' ', $this->input->get_request_header('Authorization'))[1];
+          $auth = explode(' ', $this->input->get_request_header('Authorization'));
+          if (sizeof($auth) > 1) return $auth[1];
+          return null;
      }
 
      public function getHeaderApiKey()
