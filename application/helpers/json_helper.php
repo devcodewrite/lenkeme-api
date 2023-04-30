@@ -20,7 +20,7 @@ if (!function_exists('datatable')) {
     {
         $ci = (object)get_instance();
         $take = intval($per_page?$per_page:100);
-        $start = ($page+1)*$per_page;
+        $start = ($page-1)*$per_page;
         $total = 0;
 
         if ($query instanceof CI_DB_driver) {
