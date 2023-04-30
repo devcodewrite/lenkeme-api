@@ -3,9 +3,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class Auth_model extends CI_Model
 {
-     protected $excluded_uris = [
-     ];
-
+     protected $excluded_uris = [];
      public function hasPermission(string $uri = null)
      {
           if (!$this->checkPermissions($uri)) {
@@ -15,8 +13,11 @@ class Auth_model extends CI_Model
 
      public function checkPermissions(string $uri = null)
      {
-          if (!$uri) return false;
+          // verify api key for app
+          $api_key = $this->getHeaderApiKey();
+          if ($this->app->where(['api_key' => $api_key])->num_rows() === 0) return false;
 
+          if (!$uri) return false;
           if (in_array($uri, $this->excluded_uris)) return true;
 
           return true;
@@ -76,7 +77,12 @@ class Auth_model extends CI_Model
 
      public function getHeaderToken()
      {
-          return explode(' ',$this->input->get_request_header('Authorization'))[1];
+          return explode(' ', $this->input->get_request_header('Authorization'))[1];
+     }
+
+     public function getHeaderApiKey()
+     {
+          return $this->input->get_request_header('Api-Key');
      }
 
      public function user()
@@ -89,37 +95,37 @@ class Auth_model extends CI_Model
           $where = [
                'username' => $username,
           ];
-          $user = $this->user->all()->select(['password','token'])->where($where)->get()->row();
+          $user = $this->user->all()->select(['password', 'token'])->where($where)->get()->row();
           if (!$user) {
                $this->session->set_flashdata('auth_error', "This account doesn't exist!");
                $this->session->set_flashdata('auth_error_code', 4);
                return false;
           }
-          if($user->email_verified_at === null){
-         //      $this->session->set_flashdata('auth_error', "Email is not verified. Check your email for your verification link and click on it to verify.");
-         //      $this->session->set_flashdata('auth_error_code', 6);
-         //      return false;
+          if ($user->email_verified_at === null) {
+               //      $this->session->set_flashdata('auth_error', "Email is not verified. Check your email for your verification link and click on it to verify.");
+               //      $this->session->set_flashdata('auth_error_code', 6);
+               //      return false;
           }
 
-          if($user->phone_verified_at === null){
+          if ($user->phone_verified_at === null) {
                $this->session->set_flashdata('auth_error', "Phone number is not verified!");
                $this->session->set_flashdata('auth_error_code', 7);
                return false;
           }
 
-          if($user->status === 'inactive'){
+          if ($user->status === 'inactive') {
                $this->session->set_flashdata('auth_error', "This account is de-activated or suspended!");
                $this->session->set_flashdata('auth_error_code', 8);
                return false;
           }
-     
+
           if (password_verify($pass, $user->password)) {
                $this->user->update($user->id, ['last_login_at' => date('Y-m-d H:i:s', strtotime('now Africa/Accra'))]);
 
                return $this->user->all()->select(['token'])->where($where)->get()->row();
           }
           $this->session->set_flashdata('auth_error', "Invalid credentials");
-          $this->session->set_flashdata('auth_error_code',9);
+          $this->session->set_flashdata('auth_error_code', 9);
 
           return false;
      }

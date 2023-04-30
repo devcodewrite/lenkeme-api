@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') or exit('No direct script allowed');
 
-class Auth extends CI_Controller
+class Auth extends MY_Controller
 {
     /**
      * Show login form
