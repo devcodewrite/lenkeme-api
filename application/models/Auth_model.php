@@ -17,8 +17,10 @@ class Auth_model extends CI_Model
           // verify api key for app
           $api_key = $this->getHeaderApiKey();
           $where = ['api_key' => $api_key, 'request' => 'approved'];
-          if ($this->app->where($where)->num_rows() === 0) return false;
-
+          if ($this->app->where($where)->num_rows() === 0) {
+               httpReponseError('Unauthorized Access! Invalid Api Key', 401);
+               return false;
+          }
           if (!$uri) return false;
           if (in_array($uri, $this->excluded_uris)) return true;
 
