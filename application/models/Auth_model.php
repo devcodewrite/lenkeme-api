@@ -9,9 +9,10 @@ class Auth_model extends CI_Model
           if (!$this->checkPermissions($uri)) {
                httpReponseError('Unauthorized Access!', 401);
           }
+          return true;
      }
 
-     public function checkPermissions(string $uri = null)
+     private function checkPermissions(string $uri = null)
      {
           // verify api key for app
           $api_key = $this->getHeaderApiKey();
