@@ -131,7 +131,7 @@ class Account extends MY_Controller
         }
         $user = auth()->user();
 
-        $start = $this->input->get('start');
+        $page = $this->input->get('page');
         $length = $this->input->get('length');
         $inputs = $this->input->get();
         $query = $this->post->all();
@@ -143,7 +143,7 @@ class Account extends MY_Controller
 
         $query->where($where);
 
-        $out = json($query, $start, $length, $inputs);
+        $out = json($query, $page, $length, $inputs);
         if ($out)
             $out = array_merge($out, [
                 'input' => $this->input->get(),
@@ -172,7 +172,7 @@ class Account extends MY_Controller
         }
         $user = auth()->user();
 
-        $start = $this->input->get('start');
+        $page = $this->input->get('page');
         $length = $this->input->get('length');
         $inputs = $this->input->get();
         $query = $this->job->all()
@@ -182,7 +182,7 @@ class Account extends MY_Controller
         $where = ['user_jobs.user_id' => $user->id];
         $query->where($where);
 
-        $out = json($query, $start, $length, $inputs);
+        $out = json($query, $page, $length, $inputs);
         if ($out)
             $out = array_merge($out, [
                 'input' => $this->input->get(),
@@ -211,7 +211,7 @@ class Account extends MY_Controller
         }
         $user = auth()->user();
 
-        $start = $this->input->get('start');
+        $page = $this->input->get('page');
         $length = $this->input->get('length');
         $inputs = $this->input->get();
         $query = $this->favourite->all();
@@ -219,7 +219,7 @@ class Account extends MY_Controller
 
         $query->where($where);
 
-        $out = json($query, $start, $length, $inputs);
+        $out = json($query, $page, $length, $inputs);
         if ($out)
             $out = array_merge($out, [
                 'input' => $this->input->get(),

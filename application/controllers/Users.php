@@ -42,7 +42,7 @@ class Users extends MY_Controller
                 return;
             }
 
-            $start = $this->input->get('start');
+            $page = $this->input->get('page');
             $length = $this->input->get('length');
             $inputs = $this->input->get();
             $query = $this->user->all();
@@ -57,7 +57,7 @@ class Users extends MY_Controller
 
             $query->where($where);
 
-            $out = json($query, $start, $length, $inputs, function ($item) {
+            $out = json($query, $page, $length, $inputs, function ($item) {
                 return (object)array_merge((array)$item, [
                     'jobs' => $this->job->all()
                         ->join('user_jobs', 'user_jobs.job_id=jobs.id')
@@ -94,7 +94,7 @@ class Users extends MY_Controller
             return;
         }
 
-        $start = $this->input->get('start');
+        $page = $this->input->get('page');
         $length = $this->input->get('length');
 
         $inputs = $this->input->get();
@@ -107,7 +107,7 @@ class Users extends MY_Controller
         $query->where($where)
             ->where('users.phone_verified_at !=', null);
 
-        $out = json($query, $start, $length, $inputs, function ($item) {
+        $out = json($query, $page, $length, $inputs, function ($item) {
             return (object)array_merge((array)$item, [
                 'jobs' => $this->job->all()
                     ->join('user_jobs', 'user_jobs.job_id=jobs.id')
@@ -151,7 +151,7 @@ class Users extends MY_Controller
             return;
         }
 
-        $start = $this->input->get('start');
+        $page = $this->input->get('page');
         $length = $this->input->get('length');
         $inputs = $this->input->get();
         $query = $this->post->all();
@@ -163,7 +163,7 @@ class Users extends MY_Controller
 
         $query->where($where);
 
-        $out = json($query, $start, $length, $inputs);
+        $out = json($query, $page, $length, $inputs);
         if ($out)
             $out = array_merge($out, [
                 'input' => $this->input->get(),

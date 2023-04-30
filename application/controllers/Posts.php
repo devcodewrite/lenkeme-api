@@ -43,7 +43,7 @@ class Posts extends MY_Controller
                 return;
             }
 
-            $start = $this->input->get('start');
+            $page = $this->input->get('page');
             $length = $this->input->get('length');
             $inputs = $this->input->get();
             $query = $this->post->all();
@@ -55,7 +55,7 @@ class Posts extends MY_Controller
 
             $query->where($where);
 
-            $out = json($query, $start, $length, $inputs, function ($item) {
+            $out = json($query, $page, $length, $inputs, function ($item) {
                 return (object)array_merge((array)$item, [
                     'user' => $this->user->all()
                         ->where('id', $item->user_id)

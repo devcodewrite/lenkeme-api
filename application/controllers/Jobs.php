@@ -43,7 +43,7 @@ class jobs extends MY_Controller
                 return;
             }
 
-            $start = $this->input->get('start');
+            $page = $this->input->get('page');
             $length = $this->input->get('length');
             $inputs = $this->input->get();
             $query = $this->job->all();
@@ -55,7 +55,7 @@ class jobs extends MY_Controller
 
             $query->where($where);
 
-            $out = json($query, $start, $length, $inputs);
+            $out = json($query, $page, $length, $inputs);
             if ($out)
                 $out = array_merge($out, [
                     'input' => $this->input->get(),

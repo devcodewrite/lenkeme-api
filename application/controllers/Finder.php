@@ -10,7 +10,7 @@ class Finder extends MY_Controller
      */
     public function find_artisans()
     {
-        $start = $this->input->get('start');
+        $page = $this->input->get('page');
         $length = $this->input->get('length');
         $inputs = $this->input->get();
 
@@ -43,14 +43,14 @@ class Finder extends MY_Controller
             'users.city',
             'users.country'
         ];
-        $query->group_start();
+        $query->group_page();
         foreach ($fields as  $field) {
             $query->or_like($field, $inputs['keywords'], 'both');
         }
         $query->group_end();
         unset($inputs['keywords']);
 
-        $query->group_start();
+        $query->group_page();
         $query->like(1);
         foreach ($inputs as $key => $val) {
             if (!empty(trim($val)))
@@ -59,7 +59,7 @@ class Finder extends MY_Controller
         $query->group_end();
         $query->where($where);
 
-        $out = json($query, $start, $length, $inputs, function ($item) {
+        $out = json($query, $page, $length, $inputs, function ($item) {
             return (object)array_merge((array)$item, [
                 'jobs' => $this->job->all()
                     ->join('user_jobs', 'user_jobs.job_id=jobs.id')
@@ -85,7 +85,7 @@ class Finder extends MY_Controller
      */
     public function suggest_artisans()
     {
-        $start = $this->input->get('start');
+        $page = $this->input->get('page');
         $length = inputJson('length', 20);
         $inputs = $this->input->get();
 
@@ -109,14 +109,14 @@ class Finder extends MY_Controller
             }
             unset($inputs['jobs']);
         }
-        $query->group_start();
+        $query->group_page();
         $query->or_like('jobs.title', $inputs['keywords'],  'both');
         $query->or_like('jobs.description', $inputs['keywords'],  'both');
         $query->or_like('users.city', $inputs['keywords'],  'both');
         $query->group_end();
         unset($inputs['keywords']);
 
-        $query->group_start();
+        $query->group_page();
         $query->like(1);
         foreach ($inputs as $key => $val) {
             if (!empty(trim($val)))
@@ -126,7 +126,7 @@ class Finder extends MY_Controller
 
         $query->where($where);
 
-        $out = json($query, $start, $length, $inputs);
+        $out = json($query, $page, $length, $inputs);
         if ($out)
             $out = array_merge($out, [
                 'input' => $this->input->get(),
