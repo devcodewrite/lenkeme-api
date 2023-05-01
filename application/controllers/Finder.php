@@ -43,14 +43,14 @@ class Finder extends MY_Controller
             'users.city',
             'users.country'
         ];
-        $query->group_page();
+        $query->group_start();
         foreach ($fields as  $field) {
             $query->or_like($field, $inputs['keywords'], 'both');
         }
         $query->group_end();
         unset($inputs['keywords']);
 
-        $query->group_page();
+        $query->group_start();
         $query->like(1);
         foreach ($inputs as $key => $val) {
             if (!empty(trim($val)))
@@ -109,14 +109,14 @@ class Finder extends MY_Controller
             }
             unset($inputs['jobs']);
         }
-        $query->group_page();
+        $query->group_start();
         $query->or_like('jobs.title', $inputs['keywords'],  'both');
         $query->or_like('jobs.description', $inputs['keywords'],  'both');
         $query->or_like('users.city', $inputs['keywords'],  'both');
         $query->group_end();
         unset($inputs['keywords']);
 
-        $query->group_page();
+        $query->group_start();
         $query->like(1);
         foreach ($inputs as $key => $val) {
             if (!empty(trim($val)))
