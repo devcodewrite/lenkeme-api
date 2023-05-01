@@ -49,6 +49,8 @@ class Finder extends MY_Controller
         }
         $query->group_end();
         unset($inputs['keywords']);
+        unset($inputs['length']);
+        unset($inputs['page']);
 
         $query->group_start();
         $query->like(1);
@@ -114,7 +116,10 @@ class Finder extends MY_Controller
         $query->or_like('jobs.description', $inputs['keywords'],  'both');
         $query->or_like('users.city', $inputs['keywords'],  'both');
         $query->group_end();
+
         unset($inputs['keywords']);
+        unset($inputs['length']);
+        unset($inputs['page']);
 
         $query->group_start();
         $query->like(1);
