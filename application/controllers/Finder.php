@@ -45,7 +45,7 @@ class Finder extends MY_Controller
         ];
         $query->group_start();
         foreach ($fields as  $field) {
-            $query->or_like($field, $inputs['keywords'], 'before');
+            $query->or_like($field, $inputs['keywords'], 'both');
         }
         $query->group_end();
         unset($inputs['keywords']);
@@ -56,7 +56,7 @@ class Finder extends MY_Controller
         $query->like(1);
         foreach ($inputs as $key => $val) {
             if (!empty(trim($val)))
-                $query->like($key, $val, 'before');
+                $query->like($key, $val, 'both');
         }
         $query->group_end();
         $query->where($where);
@@ -112,9 +112,9 @@ class Finder extends MY_Controller
             unset($inputs['jobs']);
         }
         $query->group_start();
-        $query->or_like('jobs.title', $inputs['keywords'],  'before');
-        $query->or_like('jobs.description', $inputs['keywords'],  'before');
-        $query->or_like('users.city', $inputs['keywords'],  'before');
+        $query->or_like('jobs.title', $inputs['keywords'],  'both');
+        $query->or_like('jobs.description', $inputs['keywords'],  'both');
+        $query->or_like('users.city', $inputs['keywords'],  'both');
         $query->group_end();
 
         unset($inputs['keywords']);
@@ -123,10 +123,10 @@ class Finder extends MY_Controller
 
         $query->group_start();
         $query->like(1);
-
+        
         foreach ($inputs as $key => $val) {
             if (!empty(trim($val)))
-                $query->like($key, $val, 'before');
+                $query->like($key, $val, 'both');
         }
         $query->group_end();
         $query->where($where);
