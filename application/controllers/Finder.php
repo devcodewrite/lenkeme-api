@@ -66,7 +66,7 @@ class Finder extends MY_Controller
         $query->like(1);
         foreach ($inputs as $key => $val) {
             if (!empty(trim($val)))
-                $query->like($key, $val, 'both');
+                $query->or_like($key, $val, 'both');
         }
         $query->group_end();
         $query->where($where);
