@@ -27,21 +27,21 @@ class Finder extends MY_Controller
                 ->join('user_jobs', 'user_jobs.user_id=users.id')
                 ->join('jobs', 'jobs.id=user_jobs.job_id');
 
-            $fields = [
-                'jobs.title',
-                'jobs.description',
-                'users.firstname',
-                'users.lastname',
-                'users.display_name',
-                'user_jobs.location',
-                'users.city',
-                'users.country'
-            ];
-            $query->group_start();
-            foreach ($fields as  $field) {
-                $query->or_like($field, $inputs['keywords'], 'both');
-            }
-            $query->group_end();
+            // $fields = [
+            //     'jobs.title',
+            //     'jobs.description',
+            //     'users.firstname',
+            //     'users.lastname',
+            //     'users.display_name',
+            //     'user_jobs.location',
+            //     'users.city',
+            //     'users.country'
+            // ];
+            // $query->group_start();
+            // foreach ($fields as  $field) {
+            //     $query->or_like($field, $inputs['keywords'], 'both');
+            // }
+            // $query->group_end();
         }
 
         $where = [
