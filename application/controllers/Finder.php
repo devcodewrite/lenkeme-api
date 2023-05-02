@@ -118,7 +118,7 @@ class Finder extends MY_Controller
             $query = $this->job->all2()
                 ->distinct()
                 ->select('concat(jobs.title,"-",ifnull(user_jobs.location,""),",",users.city) as suggestion', true)
-                ->select(['jobs.title', 'users.city', 'users.country', 'user_jobs.location'])
+                //->select(['jobs.title', 'users.city', 'users.country', 'user_jobs.location'])
                 ->join('user_jobs', 'user_jobs.job_id=jobs.id')
                 ->join('users', 'users.id=user_jobs.user_id');
 
