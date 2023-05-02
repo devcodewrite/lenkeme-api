@@ -14,10 +14,35 @@ class Finder extends MY_Controller
         $length = $this->input->get('length');
         $inputs = $this->input->get();
 
-        $query = $this->user->all()
-            ->distinct()
-            ->join('user_jobs', 'user_jobs.user_id=users.id')
-            ->join('jobs', 'jobs.id=user_jobs.job_id');
+        if (stripos(trim($this->input->get('keywords')), '@') === 0) {
+            $query = $this->user->all()
+                ->distinct()
+                ->join('user_jobs', 'user_jobs.user_id=users.id', 'left')
+                ->join('jobs', 'jobs.id=user_jobs.job_id', 'left');
+
+            $query->like('users.username', ltrim($inputs['keywords'], '@'), 'both');
+        } else {
+            $query = $this->user->all()
+                ->distinct()
+                ->join('user_jobs', 'user_jobs.user_id=users.id')
+                ->join('jobs', 'jobs.id=user_jobs.job_id');
+
+            $fields = [
+                'jobs.title',
+                'jobs.description',
+                'users.firstname',
+                'users.lastname',
+                'users.display_name',
+                'user_jobs.location',
+                'users.city',
+                'users.country'
+            ];
+            $query->group_start();
+            foreach ($fields as  $field) {
+                $query->or_like($field, $inputs['keywords'], 'both');
+            }
+            $query->group_end();
+        }
 
         $where = [
             'users.status' => 'active',
@@ -33,21 +58,6 @@ class Finder extends MY_Controller
             unset($inputs['jobs']);
         }
 
-        $fields = [
-            'jobs.title',
-            'jobs.description',
-            'users.firstname',
-            'users.lastname',
-            'users.display_name',
-            'user_jobs.location',
-            'users.city',
-            'users.country'
-        ];
-        $query->group_start();
-        foreach ($fields as  $field) {
-            $query->or_like($field, $inputs['keywords'], 'both');
-        }
-        $query->group_end();
         unset($inputs['keywords']);
         unset($inputs['length']);
         unset($inputs['page']);
@@ -96,16 +106,14 @@ class Finder extends MY_Controller
             'users.user_type' => 'artisan'
         ];
 
-        if (stripos(trim($this->input->get('keywords')), '@')===0) {
-            
+        if (stripos(trim($this->input->get('keywords')), '@') === 0) {
             $query = $this->user->all()
                 ->distinct()
                 ->select('concat("@",users.username) as suggestion')
                 ->join('user_jobs', 'user_jobs.user_id=users.id', 'left');
-                $query->group_start();
-                $query->like('users.username', ltrim($inputs['keywords'],'@'),'both');
-                $query->group_end();
-      
+            $query->group_start();
+            $query->like('users.username', ltrim($inputs['keywords'], '@'), 'both');
+            $query->group_end();
         } else {
             $query = $this->job->all2()
                 ->distinct()
