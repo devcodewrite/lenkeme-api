@@ -18,8 +18,10 @@ class Finder extends MY_Controller
 
         if (stripos(trim($this->input->get('keywords')), '@') === 0) {
             $query = $this->user->all()
+                
                 ->select(['users.id as key'])
-                ->join('user_jobs', 'user_jobs.user_id=users.id', 'left');
+                ->join('user_jobs', 'user_jobs.user_id=users.id', 'left')
+                ->group_by('users.id');
             $query->group_start();
             $query->like('users.username', ltrim($inputs['keywords'], '@'), 'both');
             $query->group_end();
