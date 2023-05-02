@@ -91,31 +91,39 @@ class Finder extends MY_Controller
         $length = inputJson('length', 20);
         $inputs = $this->input->get();
 
-        $query = $this->job->all2()
-            ->distinct()
-            ->select('concat(jobs.title,"-",ifnull(user_jobs.location,""),",",users.city) as suggestion', true)
-            ->select(['jobs.title', 'users.city', 'users.country', 'user_jobs.location'])
-            ->join('user_jobs', 'user_jobs.job_id=jobs.id')
-            ->join('users', 'users.id=user_jobs.user_id');
-
         $where = [
             'users.status' => 'active',
             'users.user_type' => 'artisan'
         ];
-        if ($this->input->get('jobs')) {
-            foreach (explode(',', $inputs['jobs']) as $job) {
-                $inputs = array_merge($inputs, [
-                    'jobs.title' => $job,
-                    'jobs.description' => $job
-                ]);
+
+        if (str_starts_with($this->input->get('keywords'), '@')) {
+            $query = $this->user->all()
+                ->distinct()
+                ->select('concat(users.username) as suggestion', true)
+                ->join('user_jobs', 'user_jobs.user_id=users.id');
+        } else {
+            $query = $this->job->all2()
+                ->distinct()
+                ->select('concat(jobs.title,"-",ifnull(user_jobs.location,""),",",users.city) as suggestion', true)
+                ->select(['jobs.title', 'users.city', 'users.country', 'user_jobs.location'])
+                ->join('user_jobs', 'user_jobs.job_id=jobs.id')
+                ->join('users', 'users.id=user_jobs.user_id');
+
+            if ($this->input->get('jobs')) {
+                foreach (explode(',', $inputs['jobs']) as $job) {
+                    $inputs = array_merge($inputs, [
+                        'jobs.title' => $job,
+                        'jobs.description' => $job
+                    ]);
+                }
+                unset($inputs['jobs']);
             }
-            unset($inputs['jobs']);
+            $query->group_start();
+            $query->or_like('jobs.title', $inputs['keywords'],  'both');
+            $query->or_like('jobs.description', $inputs['keywords'],  'both');
+            $query->or_like('users.city', $inputs['keywords'],  'both');
+            $query->group_end();
         }
-        $query->group_start();
-        $query->or_like('jobs.title', $inputs['keywords'],  'both');
-        $query->or_like('jobs.description', $inputs['keywords'],  'both');
-        $query->or_like('users.city', $inputs['keywords'],  'both');
-        $query->group_end();
 
         unset($inputs['keywords']);
         unset($inputs['length']);
@@ -123,7 +131,7 @@ class Finder extends MY_Controller
 
         $query->group_start();
         $query->like(1);
-        
+
         foreach ($inputs as $key => $val) {
             if (!empty(trim($val)))
                 $query->like($key, $val, 'both');
