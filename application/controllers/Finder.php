@@ -100,7 +100,7 @@ class Finder extends MY_Controller
             
             $query = $this->user->all()
                 ->distinct()
-                ->select('users.username as suggestion')
+                ->select('concat("@",users.username) as suggestion')
                 ->join('user_jobs', 'user_jobs.user_id=users.id', 'left');
                 $query->group_start();
                 $query->like('users.username', ltrim($inputs['keywords'],'@'),'both');
