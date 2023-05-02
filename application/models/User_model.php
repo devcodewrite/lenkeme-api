@@ -188,6 +188,18 @@ class User_model extends CI_Model
             ->where($where);
     }
 
+    public function all2()
+    {
+        $where = ["{$this->table}.deleted_at =" => null];
+        $fields = [];
+
+        return
+            $this->db->select($fields, true)
+            ->from($this->table)
+            ->where($where);
+    }
+
+
     public function canViewAny($user)
     {
         return auth()->allow();

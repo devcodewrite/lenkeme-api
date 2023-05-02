@@ -11,75 +11,76 @@ class Finder extends MY_Controller
     public function find_artisans()
     {
         $page = $this->input->get('page');
-        $length = $this->input->get('length');
+        $length = inputJson('length', 20);
         $inputs = $this->input->get();
+
+        $where = ['users.status' => 'active', 'users.user_type' => 'artisan'];
 
         if (stripos(trim($this->input->get('keywords')), '@') === 0) {
             $query = $this->user->all()
-                ->distinct()
-                ->join('user_jobs', 'user_jobs.user_id=users.id', 'left')
-                ->join('jobs', 'jobs.id=user_jobs.job_id', 'left');
-
+                ->join('user_jobs', 'user_jobs.user_id=users.id', 'left');
+            $query->group_start();
             $query->like('users.username', ltrim($inputs['keywords'], '@'), 'both');
+            $query->group_end();
+
+            $query->where($where);
+            $out = json($query, $page, $length, $inputs, function ($item) {
+                return (object)array_merge((array)$item, [
+                    'user' => isset($item->user_id) ? $this->user->all()
+                        ->where('users.id', $item->user_id)
+                        ->get()
+                        ->result() : null
+                ]);
+            });
+            if ($out)
+                $out = array_merge($out, [
+                    'input' => $this->input->get(),
+                ]);
+            else  $out = [
+                'status' => false,
+                'input' => $this->input->get(),
+            ];
+            httpResponseJson($out);
         } else {
             $query = $this->user->all()
-                ->distinct()
                 ->join('user_jobs', 'user_jobs.user_id=users.id')
                 ->join('jobs', 'jobs.id=user_jobs.job_id');
 
-            $fields = [
-                'jobs.title',
-                'user_jobs.location',
-                'users.city',
-                'users.country'
-            ];
             $query->group_start();
-            foreach ($fields as $key => $field) {
-                foreach (str_split($inputs['keywords'],3) as $s) {
-                    $query->or_like($field, $s, 'before');
-                }
-            }
+            $query->or_like('jobs.title', $inputs['keywords'],  'both');
+            $query->or_like('jobs.description', $inputs['keywords'],  'both');
+            $query->or_like('concat("%\'",jobs.title," in ",user_jobs.location,"\'%")', $inputs['keywords'],  'both', false);
+            $query->or_like('users.city', $inputs['keywords'],  'both');
             $query->group_end();
-        }
 
-        $where = [
-            'users.status' => 'active',
-            'users.user_type' => 'artisan'
-        ];
-        if ($this->input->get('jobs')) {
-            foreach (explode(',', $inputs['jobs']) as $job) {
-                $inputs = array_merge($inputs, [
-                    'jobs.title' => $job,
-                    'jobs.description' => $job
-                ]);
+            if ($this->input->get('jobs')) {
+                $query->group_start();
+                foreach (explode(',', $inputs['jobs']) as $job) {
+                    $query->where('jobs.id', $job);
+                }
+                $query->group_end();
             }
-            unset($inputs['jobs']);
-        }
+            $query->where($where);
 
-        unset($inputs['keywords']);
-        unset($inputs['length']);
-        unset($inputs['page']);
-
-        $query->where($where);
-
-        $out = json($query, $page, $length, $inputs, function ($item) {
-            return (object)array_merge((array)$item, [
-                'jobs' => $this->job->all()
-                    ->join('user_jobs', 'user_jobs.job_id=jobs.id')
-                    ->where('user_jobs.user_id', $item->id)
-                    ->get()
-                    ->result()
-            ]);
-        });
-        if ($out)
-            $out = array_merge($out, [
+            $out = json($query, $page, $length, $inputs, function ($item) {
+                return (object)array_merge((array)$item, [
+                    'jobs' => $this->job->all()
+                        ->join('user_jobs', 'user_jobs.job_id=jobs.id')
+                        ->where('user_jobs.user_id', $item->id)
+                        ->get()
+                        ->result()
+                ]);
+            });
+            if ($out)
+                $out = array_merge($out, [
+                    'input' => $this->input->get(),
+                ]);
+            else  $out = [
+                'status' => false,
                 'input' => $this->input->get(),
-            ]);
-        else  $out = [
-            'status' => false,
-            'input' => $this->input->get(),
-        ];
-        httpResponseJson($out);
+            ];
+            httpResponseJson($out);
+        }
     }
 
     /**
@@ -92,66 +93,89 @@ class Finder extends MY_Controller
         $length = inputJson('length', 20);
         $inputs = $this->input->get();
 
-        $where = [
-            'users.status' => 'active',
-            'users.user_type' => 'artisan'
-        ];
+        $where = ['users.status' => 'active', 'users.user_type' => 'artisan'];
 
         if (stripos(trim($this->input->get('keywords')), '@') === 0) {
-            $query = $this->user->all()
+            $query = $this->user->all2()
                 ->distinct()
-                ->select('concat("@",users.username) as suggestion')
+                ->select('concat("@",users.username) as suggestion, users.id as user_id')
                 ->join('user_jobs', 'user_jobs.user_id=users.id', 'left');
             $query->group_start();
             $query->like('users.username', ltrim($inputs['keywords'], '@'), 'both');
             $query->group_end();
+
+            $query->where($where);
+            $out = json($query, $page, $length, $inputs, function ($item) {
+                return (object)array_merge((array)$item, [
+                    'user' => isset($item->user_id) ? $this->user->all()
+                        ->where('users.id', $item->user_id)
+                        ->get()
+                        ->result() : null
+                ]);
+            });
+            if ($out)
+                $out = array_merge($out, [
+                    'input' => $this->input->get(),
+                ]);
+            else  $out = [
+                'status' => false,
+                'input' => $this->input->get(),
+            ];
+            httpResponseJson($out);
         } else {
+            $q =
+                '(CASE WHEN  jobs.title LIKE "%' . $inputs['keywords']
+                . '%" THEN  concat(jobs.title," in ",user_jobs.location) WHEN concat("%\'",jobs.title," in ",user_jobs.location,"\'%") LIKE "%'
+                . $inputs['keywords'] . '%" THEN concat(jobs.title," in ",user_jobs.location) WHEN jobs.description LIKE "%'
+                . $inputs['keywords'] . '%" THEN jobs.description WHEN user_jobs.location LIKE "%'
+                . $inputs['keywords'] . '%" THEN user_jobs.location WHEN users.city LIKE "%'
+                . $inputs['keywords'] . '%" THEN concat(user_jobs.location,",",users.city) ELSE concat(jobs.title," in ",users.city) END)';
+
             $query = $this->job->all2()
-                ->distinct()
-                ->select('concat(jobs.title,"-",ifnull(user_jobs.location,""),",",users.city) as suggestion', true)
-                ->select(['jobs.title as job_title', 'users.city', 'users.country', 'user_jobs.location'])
+                ->select([
+                    "$q as suggestion",
+                    'jobs.title',
+                    'jobs.description',
+                    'user_jobs.location',
+                    'users.city',
+                    'user_jobs.user_id'
+                ], false)
                 ->join('user_jobs', 'user_jobs.job_id=jobs.id')
                 ->join('users', 'users.id=user_jobs.user_id');
 
-            if ($this->input->get('jobs')) {
-                foreach (explode(',', $inputs['jobs']) as $job) {
-                    $inputs = array_merge($inputs, [
-                        'jobs.title' => $job,
-                        'jobs.description' => $job
-                    ]);
-                }
-                unset($inputs['jobs']);
-            }
             $query->group_start();
             $query->or_like('jobs.title', $inputs['keywords'],  'both');
             $query->or_like('jobs.description', $inputs['keywords'],  'both');
+            $query->or_like('concat("%\'",jobs.title," in ",user_jobs.location,"\'%")', $inputs['keywords'],  'both', false);
             $query->or_like('users.city', $inputs['keywords'],  'both');
             $query->group_end();
-        }
 
-        unset($inputs['keywords']);
-        unset($inputs['length']);
-        unset($inputs['page']);
+            if ($this->input->get('jobs')) {
+                $query->group_start();
+                foreach (explode(',', $inputs['jobs']) as $job) {
+                    $query->where('jobs.id', $job);
+                }
+                $query->group_end();
+            }
+            $query->where($where);
 
-        $query->group_start();
-        $query->like(1);
-
-        foreach ($inputs as $key => $val) {
-            if (!empty(trim($val)))
-                $query->like($key, $val, 'both');
-        }
-        $query->group_end();
-        $query->where($where);
-
-        $out = json($query, $page, $length, $inputs);
-        if ($out)
-            $out = array_merge($out, [
+            $out = json($query, $page, $length, $inputs, function ($item) {
+                return (object)array_merge((array)$item, [
+                    'user' => isset($item->user_id) ? $this->user->all()
+                        ->where('users.id', $item->user_id)
+                        ->get()
+                        ->result() : null
+                ]);
+            });
+            if ($out)
+                $out = array_merge($out, [
+                    'input' => $this->input->get(),
+                ]);
+            else  $out = [
+                'status' => false,
                 'input' => $this->input->get(),
-            ]);
-        else  $out = [
-            'status' => false,
-            'input' => $this->input->get(),
-        ];
-        httpResponseJson($out);
+            ];
+            httpResponseJson($out);
+        }
     }
 }
