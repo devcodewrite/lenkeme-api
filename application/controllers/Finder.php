@@ -96,11 +96,16 @@ class Finder extends MY_Controller
             'users.user_type' => 'artisan'
         ];
 
-        if (str_starts_with($this->input->get('keywords'), '@')) {
+        if (stripos(trim($this->input->get('keywords')), '@')===0) {
+            
             $query = $this->user->all()
                 ->distinct()
-                ->select('concat(users.username) as suggestion', true)
-                ->join('user_jobs', 'user_jobs.user_id=users.id');
+                ->select('users.username as suggestion')
+                ->join('user_jobs', 'user_jobs.user_id=users.id', 'left');
+                $query->group_start();
+                $query->like('users.username', ltrim($inputs['keywords'],'@'),'both');
+                $query->group_end();
+      
         } else {
             $query = $this->job->all2()
                 ->distinct()
