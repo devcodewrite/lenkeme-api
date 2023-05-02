@@ -35,7 +35,7 @@ class Finder extends MY_Controller
             ];
             $query->group_start();
             foreach ($fields as $key => $field) {
-                foreach (str_split($inputs['keywords']) as $s) {
+                foreach (str_split($inputs['keywords'],3) as $s) {
                     $query->or_like($field, $s, 'both');
                 }
             }
