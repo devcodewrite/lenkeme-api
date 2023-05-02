@@ -27,21 +27,19 @@ class Finder extends MY_Controller
                 ->join('user_jobs', 'user_jobs.user_id=users.id')
                 ->join('jobs', 'jobs.id=user_jobs.job_id');
 
-            // $fields = [
-            //     'jobs.title',
-            //     'jobs.description',
-            //     'users.firstname',
-            //     'users.lastname',
-            //     'users.display_name',
-            //     'user_jobs.location',
-            //     'users.city',
-            //     'users.country'
-            // ];
-            // $query->group_start();
-            // foreach ($fields as  $field) {
-            //     $query->or_like($field, $inputs['keywords'], 'both');
-            // }
-            // $query->group_end();
+            $fields = [
+                'jobs.title',
+                'user_jobs.location',
+                'users.city',
+                'users.country'
+            ];
+            $query->group_start();
+            foreach ($fields as $key => $field) {
+                foreach (str_split($inputs['keywords']) as $s) {
+                    $query->or_like($field, $s, 'both');
+                }
+            }
+            $query->group_end();
         }
 
         $where = [
@@ -62,13 +60,6 @@ class Finder extends MY_Controller
         unset($inputs['length']);
         unset($inputs['page']);
 
-        $query->group_start();
-        $query->like(1);
-        foreach ($inputs as $key => $val) {
-            if (!empty(trim($val)))
-                $query->or_like($key, $val, 'both');
-        }
-        $query->group_end();
         $query->where($where);
 
         $out = json($query, $page, $length, $inputs, function ($item) {
