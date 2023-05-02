@@ -44,7 +44,8 @@ class Finder extends MY_Controller
         } else {
             $query = $this->user->all()
                 ->join('user_jobs', 'user_jobs.user_id=users.id')
-                ->join('jobs', 'jobs.id=user_jobs.job_id');
+                ->join('jobs', 'jobs.id=user_jobs.job_id')
+                ->group_by('users.id');
 
             $query->group_start();
             $query->or_like('jobs.title', $inputs['keywords'],  'both');
