@@ -78,7 +78,7 @@ class Post_model extends CI_Model
         ];
         $post = $this->all()->where($where)->get()->row();
         if(!$post) return false;
-       
+       $post->user = $this->user->find($post->user_id);
         return $post;
     }
 
