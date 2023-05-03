@@ -56,12 +56,14 @@ class Posts extends MY_Controller
             $query->where($where);
 
             $out = json($query, $page, $length, $inputs, function ($item) {
-                return (object)array_merge((array)$item, [
-                    'user' => $this->user->all()
-                        ->where('id', $item->user_id)
-                        ->get()
-                        ->row()
-                ]);
+                $user = $this->user->all()->where('id', $item->user_id)->get()->row();
+                $user->jobs = $this->job->all()
+                    ->join('user_jobs', 'user_jobs.job_id=jobs.id')
+                    ->where('user_id', $item->user_id)
+                    ->get()
+                    ->result();
+                $item->user = $user;
+                return $item;
             });
             if ($out)
                 $out = array_merge($out, [
