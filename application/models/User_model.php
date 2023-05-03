@@ -144,8 +144,7 @@ class User_model extends CI_Model
         ];
         return $this->update($id, $data);
     }
-
-
+    
     /**
      * Get user by id
      */
@@ -157,7 +156,11 @@ class User_model extends CI_Model
             'id' => $id,
             "deleted_at" => null
         ];
-        return $this->all()->where($where)->get()->row();
+        $user = $this->all()->where($where)->get()->row();
+
+        if(!$user) return false;
+        $user->jobs = $this->userjob->find($user->id);
+        return $user;
     }
 
     /**
