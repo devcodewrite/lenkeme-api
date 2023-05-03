@@ -58,13 +58,13 @@ class Users extends MY_Controller
             $query->where($where);
 
             $out = json($query, $page, $length, $inputs, function ($item) {
-                return (object)array_merge((array)$item, [
-                    'jobs' => $this->job->all()
-                        ->join('user_jobs', 'user_jobs.job_id=jobs.id')
-                        ->where('user_jobs.user_id', $item->id)
-                        ->get()
-                        ->result()
-                ]);
+                $jobs = $this->job->all()
+                    ->join('user_jobs', 'user_jobs.job_id=jobs.id')
+                    ->where('user_jobs.user_id', $item->id)
+                    ->get()
+                    ->result();
+                $item->jobs = $jobs;
+                return $item;
             });
             if ($out)
                 $out = array_merge($out, [
@@ -108,13 +108,18 @@ class Users extends MY_Controller
             ->where('users.phone_verified_at !=', null);
 
         $out = json($query, $page, $length, $inputs, function ($item) {
-            return (object)array_merge((array)$item, [
-                'jobs' => $this->job->all()
-                    ->join('user_jobs', 'user_jobs.job_id=jobs.id')
-                    ->where('user_jobs.user_id', $item->id)
-                    ->get()
-                    ->result()
-            ]);
+            $authUser = auth()->user();
+            if ($authUser) {
+                $favUser = $this->favourite->find($authUser->id, $item->id);
+                $item->is_favourite = $favUser ? true : false;
+            }
+            $jobs = $this->job->all()
+                ->join('user_jobs', 'user_jobs.job_id=jobs.id')
+                ->where('user_jobs.user_id', $item->id)
+                ->get()
+                ->result();
+            $item->jobs = $jobs;
+            return $item;
         });
         if ($out)
             $out = array_merge($out, [

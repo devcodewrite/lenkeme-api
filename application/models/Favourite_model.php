@@ -22,35 +22,19 @@ class Favourite_model extends CI_Model
         $data = $this->extract($record);
 
         if ($this->db->insert($this->table, $data)) {
-            return $this->find($record['user_id1']);
+            return $this->find($record['user_id'],$record['user_id1']);
         }
     }
-
-    /**
-     * Update a record
-     * @param $id
-     * @return Boolean
-     */
-    public function update(int $id, array $data)
-    {
-        $data = $this->extract($data);
-        $this->db->set($data);
-        $this->db->where('id', $id);
-        $this->db->update($this->table);
-        return $this->find($id);
-    }
-
 
     /**
      * Delete a record
      * @param $id
      * @return Boolean
      */
-    public function delete(int $id)
+    public function delete(int $userId, int $id)
     {
-        $role = $this->find($id);
-        if ($this->perm->delete($role->permission_id))
-            return $this->db->delete($this->table, ['id' => $id]);
+        $role = $this->find($userId, $id);
+            return $this->db->delete($this->table, ['user_id1' => $id, 'user_id'=>$userId]);
         
         return false;
     }
@@ -74,12 +58,13 @@ class Favourite_model extends CI_Model
     /**
      * Get role by id
      */
-    public function find(int $id)
+    public function find(int $userId, int $id)
     {
         if (!$id) return;
 
         $where = [
             'user_id1' => $id,
+            'user_id' => $userId,
         ];
         $user_favourite = $this->all()->where($where)->get()->row();
         if(!$user_favourite) return false;
