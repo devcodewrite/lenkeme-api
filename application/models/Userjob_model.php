@@ -14,19 +14,19 @@ class Userjob_model extends CI_Model
 
         if (isset($record['jobs'])) {
             $data2 = [];
-            $jobs = explode(',', $record['jobs']) ;
+            $jobs = explode(',', $record['jobs']);
             foreach ($jobs as $job_id) {
-                if($this->job->where(['id' => $job_id])->num_rows() === 0){
+                if ($this->job->where(['id' => $job_id])->num_rows() === 0) {
                     $this->session->set_flashdata('error_message', "Job id: $job_id wasn't not found!");
                     $this->session->set_flashdata('error_code', 14);
                     return false;
                 }
-                if($this->where(['user_id' =>$record['user_id'], 'job_id' => $job_id])->num_rows() > 0){
+                if ($this->where(['user_id' => $record['user_id'], 'job_id' => $job_id])->num_rows() > 0) {
                     continue;
                 }
                 array_push($data2, array_merge($data, ['job_id' => $job_id]));
             }
-            
+
             return $this->db->insert_batch($this->table, $data2);
         }
         return $this->db->insert($this->table, $data);
@@ -113,9 +113,8 @@ class Userjob_model extends CI_Model
             if (in_array($field_data->name, $this->job->hidden)) continue; // skip hidden fields
             array_push($fields, "{$this->job->table}.$field_data->name");
         }
-
-        return $this->all()
-            ->select($fields)
+        return $this->db->select($fields)
+            ->from($this->table)
             ->join('jobs', 'jobs.id=user_jobs.job_id');
     }
 

@@ -53,15 +53,13 @@ class Posts extends MY_Controller
             if ($this->input->get('status'))
                 $where = array_merge($where, ['posts.status' => $inputs['status']]);
 
+            if ($this->input->get('approval'))
+                $where = array_merge($where, ['users.approval' => $inputs['approval']]);
+
             $query->where($where);
 
             $out = json($query, $page, $length, $inputs, function ($item) {
-                $user = $this->user->all()->where('id', $item->user_id)->get()->row();
-                $user->jobs = $this->job->all()
-                    ->join('user_jobs', 'user_jobs.job_id=jobs.id')
-                    ->where('user_id', $item->user_id)
-                    ->get()
-                    ->result();
+                $user = $this->user->find($item->user_id);
                 $item->user = $user;
                 return $item;
             });

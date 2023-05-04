@@ -58,12 +58,7 @@ class Users extends MY_Controller
             $query->where($where);
 
             $out = json($query, $page, $length, $inputs, function ($item) {
-                $jobs = $this->job->all()
-                    ->join('user_jobs', 'user_jobs.job_id=jobs.id')
-                    ->where('user_jobs.user_id', $item->id)
-                    ->get()
-                    ->result();
-                $item->jobs = $jobs;
+                $item->jobs = $this->userjob->find($item->id);
                 return $item;
             });
             if ($out)
@@ -113,12 +108,7 @@ class Users extends MY_Controller
                 $favUser = $this->favourite->find($authUser->id, $item->id);
                 $item->is_favourite = $favUser ? true : false;
             }
-            $jobs = $this->job->all()
-                ->join('user_jobs', 'user_jobs.job_id=jobs.id')
-                ->where('user_jobs.user_id', $item->id)
-                ->get()
-                ->result();
-            $item->jobs = $jobs;
+            $item->jobs = $this->userjob->find($item->id);
             return $item;
         });
         if ($out)
@@ -161,7 +151,7 @@ class Users extends MY_Controller
         $inputs = $this->input->get();
         $query = $this->post->all();
 
-        $where = ['user_id' => $user->id];
+        $where = ['user_posts.user_id' => $user->id];
 
         if ($this->input->get('status'))
             $where = array_merge($where, ['posts.status' => $inputs['status']]);
@@ -169,13 +159,7 @@ class Users extends MY_Controller
         $query->where($where);
 
         $out = json($query, $page, $length, $inputs,  function ($item) {
-            $user = $this->user->all()->where('id', $item->user_id)->get()->row();
-            $user->jobs = $this->job->all()
-                ->join('user_jobs', 'user_jobs.job_id=jobs.id')
-                ->where('user_id', $item->user_id)
-                ->get()
-                ->result();
-            $item->user = $user;
+            $item->user = $this->user->find($item->user_id);
             return $item;
         });
         if ($out)
@@ -187,6 +171,79 @@ class Users extends MY_Controller
             'input' => $this->input->get(),
         ];
         httpResponseJson($out);
+    }
+
+     /**
+     * Show a list of resources
+     * @return http json
+     */
+    public function with_posts($id = null)
+    {
+        if ($id !== null) {
+            $gate = auth()->can('view', 'user');
+            if ($gate->allowed()) {
+                $user  = $this->user->find($id);
+                if ($user) {
+                    $out = [
+                        'data' => $user,
+                        'status' => true,
+                    ];
+                } else {
+                    $out = [
+                        'status' => false,
+                        'message' => "User not found!"
+                    ];
+                }
+            } else {
+                $out = [
+                    'status' => false,
+                    'message' => $gate->message
+                ];
+            }
+            httpResponseJson($out);
+        } else {
+            $gate = auth()->can('viewAny', 'user');
+            if ($gate->denied()) {
+                $out = [
+                    'status' => false,
+                    'message' => $gate->message
+                ];
+                httpReponseError($out, 401);
+                return;
+            }
+
+            $page = $this->input->get('page');
+            $length = $this->input->get('length');
+            $inputs = $this->input->get();
+            $query = $this->user->all()->join('user_posts', 'user_posts.user_id=users.id');
+
+            $where = [];
+
+            if ($this->input->get('status'))
+                $where = array_merge($where, ['users.status' => $inputs['status']]);
+
+            if ($this->input->get('approval'))
+                $where = array_merge($where, ['users.approval' => $inputs['approval']]);
+
+            if ($this->input->get('user_type'))
+                $where = array_merge($where, ['users.user_type' => $inputs['user_type']]);
+
+            $query->where($where);
+
+            $out = json($query, $page, $length, $inputs, function ($item) {
+                $item->jobs = $this->userjob->find($item->id);
+                return $item;
+            });
+            if ($out)
+                $out = array_merge($out, [
+                    'input' => $this->input->get(),
+                ]);
+            else  $out = [
+                'status' => false,
+                'input' => $this->input->get(),
+            ];
+            httpResponseJson($out);
+        }
     }
 
     /**
