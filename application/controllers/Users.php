@@ -158,7 +158,10 @@ class Users extends MY_Controller
 
         $query->where($where);
 
-        $out = json($query, $page, $length, $inputs);
+        $out = json($query, $page, $length, $inputs,  function ($item) {
+            $item->user = $this->user->find($item->user_id);
+            return $item;
+        });
         if ($out)
             $out = array_merge($out, [
                 'input' => $this->input->get(),
