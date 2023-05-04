@@ -215,7 +215,8 @@ class Users extends MY_Controller
             $page = $this->input->get('page');
             $length = $this->input->get('length');
             $inputs = $this->input->get();
-            $query = $this->user->all()->join('user_posts', 'user_posts.user_id=users.id');
+            $query = $this->user->all()->join('user_posts', 'user_posts.user_id=users.id')
+                ->group_by('user_posts.user_id');
 
             $where = [];
 
