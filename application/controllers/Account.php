@@ -219,7 +219,14 @@ class Account extends MY_Controller
 
         $query->where($where);
 
-        $out = json($query, $page, $length, $inputs);
+        $out = json($query, $page, $length, $inputs, function ($item) {
+            $item->jobs = $this->job->all()
+                ->join('user_jobs', 'user_jobs.job_id=jobs.id')
+                ->where('user_id', $item->id)
+                ->get()
+                ->result();
+            return $item;
+        });
         if ($out)
             $out = array_merge($out, [
                 'input' => $this->input->get(),
