@@ -156,6 +156,9 @@ class Users extends MY_Controller
         if ($this->input->get('status'))
             $where = array_merge($where, ['posts.status' => $inputs['status']]);
 
+        if ($this->input->get('approval'))
+            $where = array_merge($where, ['user_posts.approval' => $inputs['approval']]);
+
         $query->where($where);
 
         $out = json($query, $page, $length, $inputs,  function ($item) {
@@ -224,7 +227,7 @@ class Users extends MY_Controller
                 $where = array_merge($where, ['users.status' => $inputs['status']]);
 
             if ($this->input->get('approval'))
-                $where = array_merge($where, ['users.approval' => $inputs['approval']]);
+                $where = array_merge($where, ['user_posts.approval' => $inputs['approval']]);
 
             if ($this->input->get('user_type'))
                 $where = array_merge($where, ['users.user_type' => $inputs['user_type']]);
