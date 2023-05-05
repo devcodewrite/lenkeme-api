@@ -65,8 +65,8 @@ class Auth_model extends CI_Model
                'status' => 'active',
                'token' => $token,
           ];
-          $user = $this->user->where($where)->row();
-          $sysuser = $this->sysuser->where($where)->row();
+          $user = $this->user->all()->where($where)->get()->row();
+          $sysuser = $this->sysuser->all()->where($where)->get()->row();
 
           if (!$user && !$sysuser) {
                $this->session->set_flashdata('auth_error', "This account doesn't exist! or its disabled!");

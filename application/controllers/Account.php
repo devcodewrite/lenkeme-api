@@ -14,6 +14,37 @@ class Account extends MY_Controller
      * Update a resource
      * print json Response
      */
+    public function index()
+    {
+        $user = auth()->user();
+        $gate = auth()->can('view', 'user', $user);
+        if ($gate->allowed()) {
+            if ($user) {
+                $out = [
+                    'data' => $user,
+                    'status' => true,
+                    'message' => 'User updated successfully!'
+                ];
+            } else {
+                $out = [
+                    'status' => false,
+                    'message' => "User couldn't be updated!"
+                ];
+            }
+        } else {
+            $out = [
+                'status' => false,
+                'message' => $gate->message
+            ];
+        }
+
+        httpResponseJson($out);
+    }
+
+     /**
+     * Update a resource
+     * print json Response
+     */
     public function update()
     {
         $user = auth()->user();
