@@ -3,16 +3,44 @@ defined('BASEPATH') or exit('Direct acess is not allowed');
 
 class Sysuser_model extends CI_Model
 {
-    protected $table = 'system_users';
+    public $table = 'system_users';
+
+    public $hidden = [
+        'token',
+        'otp_code',
+        'password',
+        'deleted_at'
+    ];
 
     public function create(array $record)
     {
         if (!$record) return;
-        $record['user_id'] = auth()->user()->id;
-
+        $record['token'] = sha1($record['password'].uniqid());
         if (!empty($record['password'])) $record['password'] = password_hash($record['password'], PASSWORD_DEFAULT);
-
+       
         $data = $this->extract($record);
+
+        if ($this->where(['username' => $record['username']])->row()) {
+            $this->session->set_flashdata('error_message', "@" . $record['username'] . " has been taken!");
+            $this->session->set_flashdata('error_code', 1);
+            return false;
+        }
+
+        if ($this->where(['phone' => $record['phone']])->row()) {
+            $pat1 = substr($record['phone'], 0, 2);
+            $pat2 = substr($record['phone'], 8, 2);
+            $this->session->set_flashdata('error_message', "You already have account with this phone number $pat1***$pat2");
+            $this->session->set_flashdata('error_code', 2);
+            return false;
+        }
+
+        if (isset($record['email'])) {
+            if ($this->where(['email' => $record['email']])->row()) {
+                $this->session->set_flashdata('error_message', "You already have account with this email ".$record['email']);
+                $this->session->set_flashdata('error_code', 3);
+                return false;
+            }
+        }
 
         if ($this->db->insert($this->table, $data)) {
             $this->uploadPhoto($this->db->insert_id());
@@ -116,8 +144,7 @@ class Sysuser_model extends CI_Model
         ];
         return $this->update($id, $data);
     }
-
-
+    
     /**
      * Get user by id
      */
@@ -130,12 +157,9 @@ class Sysuser_model extends CI_Model
             "deleted_at" => null
         ];
         $user = $this->all()->where($where)->get()->row();
-        if ($user) {
-            $user->role = $this->role->find($user->role_id);
 
-            if (!$user->role) return false;
-        }
-
+        if(!$user) return false;
+        $user->jobs = $this->userjob->find($user->id);
         return $user;
     }
 
@@ -153,104 +177,60 @@ class Sysuser_model extends CI_Model
      */
     public function all()
     {
-        $rtable = 'roles';
-
         $where = ["{$this->table}.deleted_at =" => null];
-        $fields = [
-            "{$this->table}.id",
-            "{$this->table}.username",
-            "{$this->table}.firstname",
-            "{$this->table}.lastname",
-            "{$this->table}.phone",
-            "{$this->table}.sex",
-            "{$this->table}.email",
-            "{$this->table}.salary",
-            "{$this->table}.phone_verified_at",
-            "{$this->table}.email_verified_at",
-            "{$this->table}.photo_url",
-            "{$this->table}.role_id",
-            "$rtable.label as role_label",
-            "{$this->table}.rstatus",
-            "{$this->table}.created_at",
-            "{$this->table}.updated_at",
-        ];
+        $fields = [];
+
+        foreach ($this->db->field_data($this->table) as $field_data) {
+            if (in_array($field_data->name, $this->hidden)) continue; // skip hidden fields
+            array_push($fields, "{$this->table}.$field_data->name");
+        }
 
         return
             $this->db->select($fields, true)
             ->from($this->table)
-            ->join($rtable, "$rtable.id={$this->table}.role_id")
             ->where($where);
     }
 
-    /**
-     * Get the association that owner this user id
-     */
-    public function association(int $id)
+    public function all2()
     {
-        $rtable = 'associations';
-        $col = 'user_id';
+        $where = ["{$this->table}.deleted_at =" => null];
+        $fields = [];
 
-        return $this->db->select("$rtable.*")
+        return
+            $this->db->select($fields, true)
             ->from($this->table)
-            ->join($rtable, "$rtable.$col=$rtable.id")
-            ->where([$col => $id])
-            ->where("$rtable.deleted_at =", null)
-            ->get()
-            ->row();
+            ->where($where);
     }
+
 
     public function canViewAny($user)
     {
-        $role = $this->user->find($user->id)->role;
-        if ($role)
-            return
-                $role->permission->is_admin === '1'
-                ? auth()->allow() : (in_array('view', explode(',', $role->permission->users)) ? auth()->allow()
-                    : auth()->deny("You don't have permission to view this recored."));
-        return auth()->deny("You don't have permission to view this recored.");
+        return auth()->allow();
     }
 
     public function canView($user, $model)
     {
-        $role = $this->user->find($user->id)->role;
-        if ($role)
-            return
-                $role->permission->is_admin === '1'
-                ? auth()->allow() : (in_array('view', explode(',', $role->permission->users)) ? auth()->allow()
-                    : auth()->deny("You don't have permission to view this recored."));
-        return auth()->deny("You don't have permission to view this recored.");
+        return auth()->allow();
     }
 
     public function canCreate($user)
     {
-        $role = $this->user->find($user->id)->role;
-        if ($role)
-            return
-                $role->permission->is_admin === '1'
-                ? auth()->allow() : (in_array('create', explode(',', $role->permission->users)) ? auth()->allow()
-                    : auth()->deny("You don't have permission to create this record."));
-        return auth()->deny("You don't have permission to create this record.");
+        return auth()->allow();
     }
 
     public function canUpdate($user, $model)
     {
-        $role = $this->user->find($user->id)->role;
-        if ($role)
-            return
-                $role->permission->is_admin === '1'
-                ? auth()->allow() : (in_array('update', explode(',', $role->permission->users)) ? auth()->allow()
-                    : auth()->deny("You don't have permission to update this record."));
-        return auth()->deny("You don't have permission to update this record.");
+        if (!auth()->authorized()) {
+            httpReponseError('Unauthorized Access!', 401);
+        }
+        return auth()->allow();
     }
 
     public function canDelete($user, $model)
     {
-        $role = $this->user->find($user->id)->role;
-        if ($role)
-            return
-                $role->permission->is_admin === '1'
-                ? auth()->allow() : (in_array('delete', explode(',', $role->permission->users)) ? auth()->allow()
-                    : auth()->deny("You don't have permission to delete this record."));
-        return auth()->deny("You don't have permission to delete this record.");
+        if (!auth()->authorized()) {
+            httpReponseError('Unauthorized Access!', 401);
+        }
+        return auth()->allow();
     }
 }

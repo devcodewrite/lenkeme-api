@@ -51,6 +51,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 */
 $route['default_controller'] = 'auth/index';
 $route['login'] = 'auth/login';
+$route['system-login'] = 'auth/system_login';
 $route['register'] = 'auth/register';
 $route['verify-otp'] = 'auth/verify_otp';
 $route['find-artisans'] = 'finder/find_artisans';

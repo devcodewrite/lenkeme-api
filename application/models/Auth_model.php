@@ -66,17 +66,20 @@ class Auth_model extends CI_Model
                'token' => $token,
           ];
           $user = $this->user->where($where)->row();
-          if (!$user) {
+          $sysuser = $this->sysuser->where($where)->row();
+
+          if (!$user && !$sysuser) {
                $this->session->set_flashdata('auth_error', "This account doesn't exist! or its disabled!");
                $this->session->set_flashdata('auth_error_code', 5);
                return false;
           }
+          
           if (empty($token) || $token === null) {
                $this->session->set_flashdata('auth_error', "Invalid access token!");
                $this->session->set_flashdata('auth_error_code', 12);
                return false;
           }
-          return $user;
+          return $user?$user:$sysuser;
      }
 
      public function getHeaderToken()
@@ -129,6 +132,46 @@ class Auth_model extends CI_Model
                $this->user->update($user->id, ['last_login_at' => date('Y-m-d H:i:s', strtotime('now Africa/Accra'))]);
 
                return $this->user->all()->select(['token'])->where($where)->get()->row();
+          }
+          $this->session->set_flashdata('auth_error', "Invalid credentials");
+          $this->session->set_flashdata('auth_error_code', 9);
+
+          return false;
+     }
+
+     public function loginSysUser(string $username = null, string $pass = null)
+     {
+          $where = [
+               'username' => $username,
+          ];
+          $user = $this->sysuser->all()->select(['password', 'token'])->where($where)->get()->row();
+          if (!$user) {
+               $this->session->set_flashdata('auth_error', "This account doesn't exist!");
+               $this->session->set_flashdata('auth_error_code', 4);
+               return false;
+          }
+          if ($user->email_verified_at === null) {
+                     $this->session->set_flashdata('auth_error', "Email is not verified. Check your email for your verification link and click on it to verify.");
+                     $this->session->set_flashdata('auth_error_code', 6);
+                     return false;
+          }
+
+          if ($user->phone_verified_at === null) {
+              // $this->session->set_flashdata('auth_error', "Phone number is not verified!");
+              // $this->session->set_flashdata('auth_error_code', 7);
+              // return false;
+          }
+
+          if ($user->status === 'inactive') {
+               $this->session->set_flashdata('auth_error', "This account is de-activated or suspended!");
+               $this->session->set_flashdata('auth_error_code', 8);
+               return false;
+          }
+
+          if (password_verify($pass, $user->password)) {
+               $this->sysuser->update($user->id, ['last_login_at' => date('Y-m-d H:i:s', strtotime('now Africa/Accra'))]);
+
+               return $this->sysuser->all()->select(['token'])->where($where)->get()->row();
           }
           $this->session->set_flashdata('auth_error', "Invalid credentials");
           $this->session->set_flashdata('auth_error_code', 9);

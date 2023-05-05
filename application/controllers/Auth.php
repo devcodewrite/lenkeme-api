@@ -67,6 +67,58 @@ class Auth extends MY_Controller
         httpResponseJson($out);
     }
 
+    /**
+     * Authenticate user and login
+     * print json Response
+     */
+    public function system_login()
+    {
+        $username = inputJson('username');
+
+        if($this->isPhoneNumber($username)){
+            $user = $this->sysuser->where(['phone' => $username])->row();
+            if($user) $username = $user->username;
+        }
+       
+        $user = auth()->loginSysUser(
+            $username,
+            inputJson('password')
+        );
+        if ($user) {
+            $out = [
+                'status' => true,
+                'data' => $user,
+                'message' => 'You have logged in successfully!'
+            ];
+        } else {
+            $error_code = auth()->error_code();
+            $out = [
+                'status' => false,
+                'code' => $error_code,
+                'message' => auth()->error()
+            ];
+
+            if($error_code == 7){
+                $user = $this->sysuser->where(['username' => $username])->row();
+                $otp = random_int(1000, 9999);
+                $temp = 'Hi {$firstname}, your OTP code is: {$code}. Do not share this with anyone.';
+                $sms = $this->sms->sendPersonalised($temp, [
+                    [
+                        'phone' => $user->phone,
+                        'firstname' => $user->firstname,
+                        'code' => $otp
+                    ]
+                ]);
+                if ($sms->sent()) $this->sysuser->update($user->id, ['otp_code' => $otp]);
+                $out = array_merge($out, [
+                    'data'=> (object)['phone' => $user->phone]
+                ]);
+            }
+            
+        }
+        httpResponseJson($out);
+    }
+
     private function isPhoneNumber($username = null): bool
     {
         return preg_match('/^[0-9]{10}+$/', $username);
