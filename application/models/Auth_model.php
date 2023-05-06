@@ -65,7 +65,7 @@ class Auth_model extends CI_Model
                'status' => 'active',
                'token' => $token,
           ];
-          $user = $this->user->all()->where($where)->get()->row();
+          $user = $this->user->all()->select('token')->where($where)->get()->row();
           $sysuser = $this->sysuser->all()->where($where)->get()->row();
 
           if (!$user && !$sysuser) {
