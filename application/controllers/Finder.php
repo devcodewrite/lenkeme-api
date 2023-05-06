@@ -13,7 +13,7 @@ class Finder extends MY_Controller
         $page = $this->input->get('page');
         $length = inputJson('length', 20);
         $inputs = $this->input->get();
-
+        $authUser = auth()->user();
         $where = ['users.status' => 'active', 'users.user_type' => 'artisan'];
 
         if (stripos(trim($this->input->get('keywords')), '@') === 0) {
@@ -25,13 +25,18 @@ class Finder extends MY_Controller
             $query->group_end();
 
             $query->where($where);
-            $out = json($query, $page, $length, $inputs, function ($item) {
-                return (object)array_merge((array)$item, [
-                    'user' => isset($item->user_id) ? $this->user->all()
-                        ->where('users.id', $item->user_id)
-                        ->get()
-                        ->result() : null
-                ]);
+            $out = json($query, $page, $length, $inputs, function ($item) use ($authUser) {
+                if ($authUser) {
+                    $favUser = $this->favourite->find($authUser->id, $item->id);
+                    $item->is_favourite = $favUser ? true : false;
+                }
+                $item->jobs = $this->job->all()
+                    ->join('user_jobs', 'user_jobs.job_id=jobs.id')
+                    ->where('user_jobs.user_id', $item->id)
+                    ->get()
+                    ->result();
+
+                return $item;
             });
             if ($out)
                 $out = array_merge($out, [
@@ -64,14 +69,18 @@ class Finder extends MY_Controller
             }
             $query->where($where);
 
-            $out = json($query, $page, $length, $inputs, function ($item) {
-                return (object)array_merge((array)$item, [
-                    'jobs' => $this->job->all()
-                        ->join('user_jobs', 'user_jobs.job_id=jobs.id')
-                        ->where('user_jobs.user_id', $item->id)
-                        ->get()
-                        ->result()
-                ]);
+            $out = json($query, $page, $length, $inputs, function ($item) use($authUser) {
+                if ($authUser) {
+                    $favUser = $this->favourite->find($authUser->id, $item->id);
+                    $item->is_favourite = $favUser ? true : false;
+                }
+                $item->jobs = $this->job->all()
+                    ->join('user_jobs', 'user_jobs.job_id=jobs.id')
+                    ->where('user_jobs.user_id', $item->id)
+                    ->get()
+                    ->result();
+
+                return $item;
             });
             if ($out)
                 $out = array_merge($out, [
