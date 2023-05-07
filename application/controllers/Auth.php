@@ -26,6 +26,9 @@ class Auth extends MY_Controller
         if($this->isPhoneNumber($username)){
             $user = $this->user->where(['phone' => $username])->row();
             if($user) $username = $user->username;
+        }else if($this->isEmail($username)) {
+            $user = $this->user->where(['email' => $username])->row();
+            if($user) $username = $user->username;
         }
        
         $user = auth()->loginUser(
@@ -122,6 +125,11 @@ class Auth extends MY_Controller
     private function isPhoneNumber($username = null): bool
     {
         return preg_match('/^[0-9]{10}+$/', $username);
+    }
+
+    private function isEmail($username = null): bool
+    {
+        return filter_var($username, FILTER_VALIDATE_EMAIL);
     }
     /**
      * Store a resource
