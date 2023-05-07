@@ -154,6 +154,7 @@ class Auth extends MY_Controller
         } else {
             $out = [
                 'status' => false,
+                'input' => $record,
                 'code' => $error_code ? $error_code : 0,
                 'message' => $error ? $error : "Users couldn't be created!",
             ];

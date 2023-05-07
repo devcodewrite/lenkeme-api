@@ -20,12 +20,6 @@ class User_model extends CI_Model
        
         $data = $this->extract($record);
 
-        if ($this->user->where(['username' => $record['username']])->row()) {
-            $this->session->set_flashdata('error_message', "@" . $record['username'] . " has been taken!");
-            $this->session->set_flashdata('error_code', 1);
-            return false;
-        }
-
         if ($this->user->where(['phone' => $record['phone']])->row()) {
             $pat1 = substr($record['phone'], 0, 2);
             $pat2 = substr($record['phone'], 8, 2);
