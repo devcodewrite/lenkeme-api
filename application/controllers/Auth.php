@@ -148,7 +148,7 @@ class Auth extends MY_Controller
             $sms = $this->sms->sendPersonalised($temp, [
                 [
                     'phone' => $user->phone,
-                    'firstname' => $user->firstname,
+                    'firstname' => $user->display_name,
                     'code' => $otp
                 ]
             ]);
