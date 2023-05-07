@@ -37,7 +37,7 @@ class User_model extends CI_Model
         }
 
         if (!isset($record['username'])) {
-            $lastid = $this->db->select()->from($this->table)->order_by('id', 'asc')->limit(1)->row('id');
+            $lastid = $this->db->select()->from($this->table)->order_by('id', 'asc')->limit(1)->get()->row('id');
             $username = "user_".substr(($lastid+random_string('numeric',10)),0,10);
             if ($this->user->where(['username' => $username])->num_row() === 0) {
                $data['username'] = $username;
