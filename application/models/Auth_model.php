@@ -66,20 +66,20 @@ class Auth_model extends CI_Model
                'token' => $token,
           ];
           $user = $this->user->all()->select('token')->where($where)->get()->row();
-          $sysuser = $this->sysuser->all()->where($where)->get()->row();
+          $sysuser = $this->sysuser->all()->select('token')->where($where)->get()->row();
 
           if (!$user && !$sysuser) {
                $this->session->set_flashdata('auth_error', "This account doesn't exist! or its disabled!");
                $this->session->set_flashdata('auth_error_code', 5);
                return false;
           }
-          
+
           if (empty($token) || $token === null) {
                $this->session->set_flashdata('auth_error', "Invalid access token!");
                $this->session->set_flashdata('auth_error_code', 12);
                return false;
           }
-          return $user?$user:$sysuser;
+          return $user ? $user : $sysuser;
      }
 
      public function getHeaderToken()
@@ -151,15 +151,15 @@ class Auth_model extends CI_Model
                return false;
           }
           if ($user->email_verified_at === null) {
-                     $this->session->set_flashdata('auth_error', "Email is not verified. Check your email for your verification link and click on it to verify.");
-                     $this->session->set_flashdata('auth_error_code', 6);
-                     return false;
+               $this->session->set_flashdata('auth_error', "Email is not verified. Check your email for your verification link and click on it to verify.");
+               $this->session->set_flashdata('auth_error_code', 6);
+               return false;
           }
 
           if ($user->phone_verified_at === null) {
-              // $this->session->set_flashdata('auth_error', "Phone number is not verified!");
-              // $this->session->set_flashdata('auth_error_code', 7);
-              // return false;
+               // $this->session->set_flashdata('auth_error', "Phone number is not verified!");
+               // $this->session->set_flashdata('auth_error_code', 7);
+               // return false;
           }
 
           if ($user->status === 'inactive') {

@@ -24,12 +24,12 @@ class Account extends MY_Controller
                 $out = [
                     'data' => $user,
                     'status' => true,
-                    'message' => 'User updated successfully!'
+                    'message' => ''
                 ];
             } else {
                 $out = [
                     'status' => false,
-                    'message' => "User couldn't be updated!"
+                    'message' => "No user found!"
                 ];
             }
         } else {
