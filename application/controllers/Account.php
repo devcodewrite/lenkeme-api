@@ -20,6 +20,7 @@ class Account extends MY_Controller
         $gate = auth()->can('view', 'user', $user);
         if ($gate->allowed()) {
             if ($user) {
+                $user = $this->user->find($user->id);
                 $out = [
                     'data' => $user,
                     'status' => true,
