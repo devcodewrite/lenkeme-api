@@ -159,7 +159,6 @@ class Sysuser_model extends CI_Model
         $user = $this->all()->where($where)->get()->row();
 
         if(!$user) return false;
-        $user->jobs = $this->userjob->find($user->id);
         return $user;
     }
 
