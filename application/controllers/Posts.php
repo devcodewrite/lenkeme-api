@@ -84,6 +84,7 @@ class Posts extends MY_Controller
         $gate = auth()->can('create', 'post');
         if ($gate->allowed()) {
             $record = inputJson();
+            $record = $record?$record:$this->input->post();
             $post  = $this->post->create($record);
             $error = $this->session->flashdata('error_message');
             if ($post) {
@@ -117,6 +118,7 @@ class Posts extends MY_Controller
         $gate = auth()->can('update', 'post', $this->post->find($id));
         if ($gate->allowed()) {
             $record = inputJson();
+            $record = $record?$record:$this->input->post();
             $post = $this->post->update($id, $record);
             if ($post) {
                 $out = [
