@@ -89,6 +89,8 @@ class Users extends MY_Controller
             return;
         }
 
+        $authUser = auth()->user();
+
         $page = $this->input->get('page');
         $length = $this->input->get('length');
 
@@ -102,8 +104,7 @@ class Users extends MY_Controller
         $query->where($where)
             ->where('users.phone_verified_at !=', null);
 
-        $out = json($query, $page, $length, $inputs, function ($item) {
-            $authUser = auth()->user();
+        $out = json($query, $page, $length, $inputs, function ($item) use ($authUser) {
             if ($authUser) {
                 $favUser = $this->favourite->find($authUser->id, $item->id);
                 $item->is_favourite = $favUser ? true : false;
@@ -154,11 +155,63 @@ class Users extends MY_Controller
         $where = ['user_posts.user_id' => $user->id];
 
         if ($this->input->get('status'))
-            $where = array_merge($where, ['posts.status' => $inputs['status']]);
+            $where = array_merge($where, ['user_posts.status' => $inputs['status']]);
 
         if ($this->input->get('approval'))
             $where = array_merge($where, ['user_posts.approval' => $inputs['approval']]);
 
+        $query->where($where);
+
+        $out = json($query, $page, $length, $inputs,  function ($item) {
+            $item->user = $this->user->find($item->user_id);
+            return $item;
+        });
+        if ($out)
+            $out = array_merge($out, [
+                'input' => $this->input->get(),
+            ]);
+        else  $out = [
+            'status' => false,
+            'input' => $this->input->get(),
+        ];
+        httpResponseJson($out);
+    }
+
+     /**
+     * Show a list of post resources
+     * @return http json
+     */
+    public function approved_posts($id = null)
+    {
+        $user  = $this->user->find($id);
+        if (!$user) {
+            $out = [
+                'status' => false,
+                'message' => "User not found!"
+            ];
+            httpReponseError($out, 401);
+        }
+
+        $gate = auth()->can('viewAny', 'post');
+        if ($gate->denied()) {
+            $out = [
+                'status' => false,
+                'message' => $gate->message
+            ];
+            httpReponseError($out, 401);
+            return;
+        }
+
+        $page = $this->input->get('page');
+        $length = $this->input->get('length');
+        $inputs = $this->input->get();
+        $query = $this->post->all();
+        $where = [
+            'user_posts.approval' => 'approved',
+            'user_posts.status' => 'active',
+            'user_posts.visibility' => 'public',
+            'user_posts.user_id' => $user->id
+        ];
         $query->where($where);
 
         $out = json($query, $page, $length, $inputs,  function ($item) {
