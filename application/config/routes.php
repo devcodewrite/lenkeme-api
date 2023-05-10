@@ -58,5 +58,6 @@ $route['find-artisans'] = 'finder/find_artisans';
 $route['suggest-artisans'] = 'finder/suggest_artisans';
 $route['(:any)/(\d+)'] = '$1/index/$2';
 $route['(:any)/(\d+)/posts'] = '$1/posts/$2';
+$route['(:any)/(\d+)/approved-posts'] = '$1/approved_posts/$2';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = TRUE;
