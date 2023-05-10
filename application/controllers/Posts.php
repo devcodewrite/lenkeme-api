@@ -50,9 +50,6 @@ class Posts extends MY_Controller
 
             $where = [];
 
-            if ($this->input->get('status'))
-                $where = array_merge($where, ['user_posts.status' => $inputs['status']]);
-
             if ($this->input->get('approval'))
                 $where = array_merge($where, ['user_posts.approval' => $inputs['approval']]);
             
@@ -84,6 +81,7 @@ class Posts extends MY_Controller
      */
     public function approved($id = null)
     {
+        $auser = auth()->user();
         if ($id !== null) {
             $gate = auth()->can('view', 'post');
             if ($gate->allowed()) {
@@ -124,11 +122,21 @@ class Posts extends MY_Controller
             $query = $this->post->all();
 
             $where = [
-                'user_posts.approval' => 'approved',
-                'user_posts.status' => 'active',
-                'user_posts.visibility' => 'public',
             ];
-
+           
+            if($auser){
+                $query->group_start();
+                $query->where("CASE WHEN user_posts.user_id = {$auser->id} THEN user_posts.visibility IS NOT NULL ELSE user_posts.visibility='public' END",null,false);
+                $query->group_end();
+                $query->group_start();
+                $query->where("CASE WHEN user_posts.user_id = {$auser->id} THEN user_posts.approval IS NOT NULL ELSE user_posts.approval='approved' END",null,false);
+                $query->group_end();
+            }else {
+                $where = array_merge($where, [
+                    'user_posts.visibility' => 'public',
+                    'user_posts.approval' => 'approved'
+                ]);
+            }
             $query->where($where);
 
             $out = json($query, $page, $length, $inputs, function ($item) {
