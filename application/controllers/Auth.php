@@ -230,4 +230,47 @@ class Auth extends MY_Controller
 
         httpResponseJson($out);
     }
+
+     /**
+     * Store a resource
+     * print json Response
+     */
+    public function send_otp()
+    {
+        $record = inputJson();
+        $where = [
+            'phone' => $record['phone'],
+        ];
+        $user  = $this->user->all()
+            ->where($where)
+            ->get()
+            ->row();
+
+        if (!$user) {
+            $out = [
+                'status' => false,
+                'code' => 10,
+                'message' => "Phone number doesn't exist in our system!"
+            ];
+        }
+        else{
+            $otp = random_int(1000, 9999);
+            $temp = 'Hi {$firstname}, your OTP code is: {$code}. Do not share this with anyone.';
+            $sms = $this->sms->sendPersonalised($temp, [
+                [
+                    'phone' => $user->phone,
+                    'firstname' => $user->display_name,
+                    'code' => $otp
+                ]
+            ]);
+            if ($sms->sent()) $this->user->update($user->id, ['otp_code' => $otp]);
+            
+            $out = [
+                'input' => $record,
+                'status' => true,
+                'message' => 'Otp send successfully!'
+            ];
+        }
+        httpResponseJson($out);
+    }
 }

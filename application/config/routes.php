@@ -54,6 +54,7 @@ $route['login'] = 'auth/login';
 $route['system-login'] = 'auth/system_login';
 $route['register'] = 'auth/register';
 $route['verify-otp'] = 'auth/verify_otp';
+$route['send-otp'] = 'auth/send_otp';
 $route['find-artisans'] = 'finder/find_artisans';
 $route['suggest-artisans'] = 'finder/suggest_artisans';
 $route['(:any)/(\d+)'] = '$1/index/$2';
