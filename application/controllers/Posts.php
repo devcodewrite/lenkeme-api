@@ -51,10 +51,13 @@ class Posts extends MY_Controller
             $where = [];
 
             if ($this->input->get('status'))
-                $where = array_merge($where, ['posts.status' => $inputs['status']]);
+                $where = array_merge($where, ['user_posts.status' => $inputs['status']]);
 
             if ($this->input->get('approval'))
                 $where = array_merge($where, ['user_posts.approval' => $inputs['approval']]);
+            
+            if ($this->input->get('visibility'))
+                $where = array_merge($where, ['user_posts.visibility' => $inputs['visibility']]);
 
             $query->where($where);
 
