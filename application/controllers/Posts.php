@@ -76,6 +76,77 @@ class Posts extends MY_Controller
     }
 
     /**
+     * Show a list of resources
+     * @return http json
+     */
+    public function approved($id = null)
+    {
+        if ($id !== null) {
+            $gate = auth()->can('view', 'post');
+            if ($gate->allowed()) {
+                $post  = $this->post->find($id);
+                if ($post) {
+                    $out = [
+                        'data' => $post,
+                        'status' => true,
+                    ];
+                } else {
+                    $out = [
+                        'status' => false,
+                        'message' => "post not found!"
+                    ];
+                }
+            } else {
+                $out = [
+                    'status' => false,
+                    'message' => $gate->message
+                ];
+            }
+            httpResponseJson($out);
+        } else {
+            $gate = auth()->can('viewAny', 'post');
+            if ($gate->denied()) {
+                $out = [
+                    'status' => false,
+                    'message' => $gate->message
+                ];
+                http_response_code(401);
+                httpResponseJson($out);
+                return;
+            }
+
+            $page = $this->input->get('page');
+            $length = $this->input->get('length');
+            $inputs = $this->input->get();
+            $query = $this->post->all();
+
+            $where = [
+                'user_posts.approval' => 'approved',
+                'user_posts.status' => 'active',
+                'user_posts.visibility' => 'public',
+            ];
+
+            $query->where($where);
+
+            $out = json($query, $page, $length, $inputs, function ($item) {
+                $user = $this->user->find($item->user_id);
+                $item->user = $user;
+                return $item;
+            });
+            if ($out)
+                $out = array_merge($out, [
+                    'input' => $this->input->get(),
+                ]);
+            else  $out = [
+                'status' => false,
+                'input' => $this->input->get(),
+            ];
+            httpResponseJson($out);
+        }
+    }
+
+
+    /**
      * Store a resource
      * print json Response
      */
@@ -84,7 +155,7 @@ class Posts extends MY_Controller
         $gate = auth()->can('create', 'post');
         if ($gate->allowed()) {
             $record = inputJson();
-            $record = $record?$record:$this->input->post();
+            $record = $record ? $record : $this->input->post();
             $post  = $this->post->create($record);
             $error = $this->session->flashdata('error_message');
             if ($post) {
@@ -118,7 +189,7 @@ class Posts extends MY_Controller
         $gate = auth()->can('update', 'post', $this->post->find($id));
         if ($gate->allowed()) {
             $record = inputJson();
-            $record = $record?$record:$this->input->post();
+            $record = $record ? $record : $this->input->post();
             $post = $this->post->update($id, $record);
             if ($post) {
                 $out = [
