@@ -50,8 +50,9 @@ class User_model extends CI_Model
         }
         
         if ($this->db->insert($this->table, $data)) {
-            $this->uploadPhoto($this->db->insert_id());
-            return $this->find($this->db->insert_id());
+            $id = $this->db->insert_id();
+            $this->uploadPhoto($id);
+            return $this->find($id);
         }
     }
 

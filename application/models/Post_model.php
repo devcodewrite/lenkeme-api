@@ -45,12 +45,6 @@ class Post_model extends CI_Model
         $data = $this->extract($data);
         $post = $this->find($id);
 
-        if ($post->approval === 'rejected') {
-            $this->session->set_flashdata('error_message', "Rejected posts cannot be updated!");
-            return false;
-        }
-        if (!isset($data['approval'])) $data['approval'] = 'pending';
-
         if (isset($_FILES['images'])) {
             $files = $_FILES; // save for later
             $cpt = sizeof($_FILES['images']['name']);
