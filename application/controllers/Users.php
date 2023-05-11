@@ -289,7 +289,7 @@ class Users extends MY_Controller
             $where = [];
 
             if ($this->input->get('visibility'))
-                $where = array_merge($where, ['users.visibility' => $inputs['visibility']]);
+                $where = array_merge($where, ['user_posts.visibility' => $inputs['visibility']]);
 
             if ($this->input->get('approval'))
                 $where = array_merge($where, ['user_posts.approval' => $inputs['approval']]);
