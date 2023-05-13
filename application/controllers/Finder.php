@@ -16,8 +16,8 @@ class Finder extends MY_Controller
         $authUser = auth()->user();
         $where = ['users.status' => 'active', 'users.user_type' => 'artisan'];
 
+        $auser = auth()->user();
         if (stripos(trim($this->input->get('keywords')), '@') === 0) {
-            $auser = auth()->user();
 
             $query = $this->user->all()
                 ->join('user_jobs', 'user_jobs.user_id=users.id', 'left')
@@ -77,6 +77,15 @@ class Finder extends MY_Controller
                 }
                 $query->group_end();
             }
+
+            if ($auser) {
+                $query->group_start();
+                $query->where("CASE WHEN users.id = {$auser->id} THEN 1 ELSE users.artisan_verified_at IS NOT NULL END", null, false);
+                $query->group_end();
+            } else {
+                $query->where('users.artisan_verified_at !=', null);
+            }
+
             $query->where($where);
 
             $out = json($query, $page, $length, $inputs, function ($item) use ($authUser) {
