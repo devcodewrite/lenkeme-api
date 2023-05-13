@@ -58,6 +58,10 @@ class User_model extends CI_Model
                 $this->session->set_flashdata('error_code', 15);
                 return false;
             }
+            $sjob = $this->job->find($jobs[0]);
+            if($sjob){
+                $record['photo_url'] = $sjob['avatar'];
+            }
         }
 
         if ($this->db->insert($this->table, $data)) {
