@@ -70,7 +70,7 @@ class User_model extends CI_Model
                 $record['user_id'] = $id;
                 $this->userjob->create($record);
             }
-            if (isset($record['photo'])){
+            if (isset($_FILES['photo'])){
                 $path = $this->uploadPhoto($id);
                 $record2['photo_url'] = $path;
                 return $this->update($id, $record2);
@@ -86,13 +86,13 @@ class User_model extends CI_Model
      */
     public function update(int $id, array $record)
     {
-        if (!$record) return;
+        if (!$record && !isset($_FILES['photo'])) return;
         if (!empty($record['password'])) {
             $record['password'] = password_hash($record['password'], PASSWORD_DEFAULT);
         } else {
             unset($record['password']);
         }
-        if (isset($record['photo'])){
+        if (isset($_FILES['photo'])){
             $path = $this->uploadPhoto($id);
             $record['photo_url'] = $path;
         }
@@ -139,12 +139,12 @@ class User_model extends CI_Model
      */
     public function uploadPhoto($id, string $field_name = 'photo', $scale = '90%', $dim = ['w' => '', 'h' => ''], $disp_error = true)
     {
-        $path = "uploads/photos/users/$id";
+        $path = "uploads/photos/users";
         if (!is_dir($path)) mkdir("./$path", 0777, TRUE);
 
         $config['upload_path'] = "./$path";
         $config['allowed_types'] = 'gif|jpg|png|jpeg';
-        $config['file_name'] = uniqid($id);
+        $config['file_name'] = $id;
         $this->load->library('upload', $config);
 
         if ($this->upload->do_upload($field_name)) {

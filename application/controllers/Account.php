@@ -63,9 +63,13 @@ class Account extends MY_Controller
                     'message' => 'User updated successfully!'
                 ];
             } else {
+                $error = $this->session->flashdata('error_message');
+                $error_code = $this->session->flashdata('error_code');
+
                 $out = [
                     'status' => false,
-                    'message' => "User couldn't be updated!"
+                    'code' => $error_code,
+                    'message' => $error?$error:"User couldn't be updated!"
                 ];
             }
         } else {
