@@ -17,12 +17,22 @@ class Finder extends MY_Controller
         $where = ['users.status' => 'active', 'users.user_type' => 'artisan'];
 
         if (stripos(trim($this->input->get('keywords')), '@') === 0) {
+            $auser = auth()->user();
+
             $query = $this->user->all()
                 ->join('user_jobs', 'user_jobs.user_id=users.id', 'left')
                 ->group_by('users.id');
             $query->group_start();
             $query->like('users.username', ltrim($inputs['keywords'], '@'), 'both');
             $query->group_end();
+
+            if ($auser) {
+                $query->group_start();
+                $query->where("CASE WHEN users.id = {$auser->id} THEN 1 ELSE users.artisan_verified_at IS NOT NULL END", null, false);
+                $query->group_end();
+            } else {
+                $query->where('users.artisan_verified_at !=', null);
+            }
 
             $query->where($where);
             $out = json($query, $page, $length, $inputs, function ($item) use ($authUser) {
@@ -69,7 +79,7 @@ class Finder extends MY_Controller
             }
             $query->where($where);
 
-            $out = json($query, $page, $length, $inputs, function ($item) use($authUser) {
+            $out = json($query, $page, $length, $inputs, function ($item) use ($authUser) {
                 if ($authUser) {
                     $favUser = $this->favourite->find($authUser->id, $item->id);
                     $item->is_favourite = $favUser ? true : false;
@@ -107,6 +117,8 @@ class Finder extends MY_Controller
         $where = ['users.status' => 'active', 'users.user_type' => 'artisan'];
 
         if (stripos(trim($this->input->get('keywords')), '@') === 0) {
+            $auser = auth()->user();
+
             $query = $this->user->all2()
                 ->distinct()
                 ->select('concat("@",users.username) as suggestion, users.id as user_id')
@@ -114,6 +126,14 @@ class Finder extends MY_Controller
             $query->group_start();
             $query->like('users.username', ltrim($inputs['keywords'], '@'), 'both');
             $query->group_end();
+
+            if ($auser) {
+                $query->group_start();
+                $query->where("CASE WHEN users.id = {$auser->id} THEN 1 ELSE users.artisan_verified_at IS NOT NULL END", null, false);
+                $query->group_end();
+            } else {
+                $query->where('users.artisan_verified_at !=', null);
+            }
 
             $query->where($where);
             $out = json($query, $page, $length, $inputs, function ($item) {
