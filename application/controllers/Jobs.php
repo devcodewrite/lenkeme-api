@@ -77,6 +77,8 @@ class jobs extends MY_Controller
         $gate = auth()->can('create', 'job');
         if ($gate->allowed()) {
             $record = inputJson();
+            $record = $record ? $record : $this->input->post();
+
             $job  = $this->job->create($record);
             if ($job) {
                 $out = [

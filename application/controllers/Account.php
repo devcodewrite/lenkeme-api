@@ -52,6 +52,8 @@ class Account extends MY_Controller
         $gate = auth()->can('update', 'user', $user);
         if ($gate->allowed()) {
             $record = inputJson();
+            $record = $record ? $record : $this->input->post();
+
             $user = $this->user->update($user->id, $record);
             if ($user) {
                 $out = [
@@ -86,6 +88,8 @@ class Account extends MY_Controller
         $gate = auth()->can('update', 'user', $user);
         if ($gate->allowed()) {
             $record = inputJson();
+            $record = $record ? $record : $this->input->post();
+
             $userjobs = $this->userjob->create($record);
             if ($userjobs) {
                 $user = $this->user->update($user->id, ['user_type' => 'artisan']);

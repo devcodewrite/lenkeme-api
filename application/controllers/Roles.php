@@ -76,7 +76,9 @@ class Roles extends MY_Controller
     {
         $gate = auth()->can('create', 'role');
         if ($gate->allowed()) {
-            $record = $this->input->post();
+            $record = inputJson();
+            $record = $record ? $record : $this->input->post();
+
             $role  = $this->role->create($record);
             if ($role) {
                 $out = [
@@ -108,7 +110,9 @@ class Roles extends MY_Controller
     {
         $gate = auth()->can('update', 'role', $this->role->find($id));
         if ($gate->allowed()) {
-            $record = $this->input->post();
+            $record = inputJson();
+            $record = $record ? $record : $this->input->post();
+
             $role = $this->role->update($id, $record);
             if ($role) {
                 $out = [

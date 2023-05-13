@@ -22,18 +22,20 @@ class Auth extends MY_Controller
     public function login()
     {
         $username = inputJson('username');
+        $username = $username ? $username : $this->input->post('username');
 
-        if($this->isPhoneNumber($username)){
+        if ($this->isPhoneNumber($username)) {
             $user = $this->user->where(['phone' => $username])->row();
-            if($user) $username = $user->username;
-        }else if($this->isEmail($username)) {
+            if ($user) $username = $user->username;
+        } else if ($this->isEmail($username)) {
             $user = $this->user->where(['email' => $username])->row();
-            if($user) $username = $user->username;
+            if ($user) $username = $user->username;
         }
-       
+        $password = inputJson('password');
+        $password = $password ? $password : $this->input->post('password');
         $user = auth()->loginUser(
             $username,
-            inputJson('password')
+            $password
         );
         if ($user) {
             $out = [
@@ -49,7 +51,7 @@ class Auth extends MY_Controller
                 'message' => auth()->error()
             ];
 
-            if($error_code == 7){
+            if ($error_code == 7) {
                 $user = $this->user->where(['username' => $username])->row();
                 $otp = random_int(1000, 9999);
                 $temp = 'Hi {$firstname}, your OTP code is: {$code}. Do not share this with anyone.';
@@ -62,10 +64,9 @@ class Auth extends MY_Controller
                 ]);
                 if ($sms->sent()) $this->user->update($user->id, ['otp_code' => $otp]);
                 $out = array_merge($out, [
-                    'data'=> (object)['phone' => $user->phone]
+                    'data' => (object)['phone' => $user->phone]
                 ]);
             }
-            
         }
         httpResponseJson($out);
     }
@@ -77,15 +78,18 @@ class Auth extends MY_Controller
     public function system_login()
     {
         $username = inputJson('username');
+        $username = $username ? $username : $this->input->post('username');
 
-        if($this->isPhoneNumber($username)){
+        if ($this->isPhoneNumber($username)) {
             $user = $this->sysuser->where(['phone' => $username])->row();
-            if($user) $username = $user->username;
+            if ($user) $username = $user->username;
         }
-       
+
+        $password = inputJson('password');
+        $password = $password ? $password : $this->input->post('password');
         $user = auth()->loginSysUser(
             $username,
-            inputJson('password')
+            $password
         );
         if ($user) {
             $out = [
@@ -101,7 +105,7 @@ class Auth extends MY_Controller
                 'message' => auth()->error()
             ];
 
-            if($error_code == 7){
+            if ($error_code == 7) {
                 $user = $this->sysuser->where(['username' => $username])->row();
                 $otp = random_int(1000, 9999);
                 $temp = 'Hi {$firstname}, your OTP code is: {$code}. Do not share this with anyone.';
@@ -114,10 +118,9 @@ class Auth extends MY_Controller
                 ]);
                 if ($sms->sent()) $this->sysuser->update($user->id, ['otp_code' => $otp]);
                 $out = array_merge($out, [
-                    'data'=> (object)['phone' => $user->phone]
+                    'data' => (object)['phone' => $user->phone]
                 ]);
             }
-            
         }
         httpResponseJson($out);
     }
@@ -138,6 +141,8 @@ class Auth extends MY_Controller
     public function register()
     {
         $record = inputJson();
+        $record = $record ? $record : $this->input->post();
+
         $user  = $this->user->create($record);
         $error = $this->session->flashdata('error_message');
         $error_code = $this->session->flashdata('error_code');
@@ -178,6 +183,8 @@ class Auth extends MY_Controller
     public function verify_otp()
     {
         $record = inputJson();
+        $record = $record ? $record : $this->input->post();
+
         $where = [
             'phone' => $record['phone'],
         ];
@@ -208,10 +215,10 @@ class Auth extends MY_Controller
             'otp_code' => null,
         ];
 
-        if($user->last_login_at === null){
-            $data = array_merge($data, ['status' => 'active', 'token' => sha1($user->id.uniqid())]);
+        if ($user->last_login_at === null) {
+            $data = array_merge($data, ['status' => 'active', 'token' => sha1($user->id . uniqid())]);
         }
-      
+
         $user = $this->user->update($user->id, $data);
         $error = $this->session->flashdata('error_message');
         if ($user) {
@@ -231,13 +238,15 @@ class Auth extends MY_Controller
         httpResponseJson($out);
     }
 
-     /**
+    /**
      * Store a resource
      * print json Response
      */
     public function send_otp()
     {
         $record = inputJson();
+        $record = $record ? $record : $this->input->post();
+
         $where = [
             'phone' => $record['phone'],
         ];
@@ -252,8 +261,7 @@ class Auth extends MY_Controller
                 'code' => 10,
                 'message' => "Phone number doesn't exist in our system!"
             ];
-        }
-        else{
+        } else {
             $otp = random_int(1000, 9999);
             $temp = 'Hi {$firstname}, your OTP code is: {$code}. Do not share this with anyone.';
             $sms = $this->sms->sendPersonalised($temp, [
@@ -264,7 +272,7 @@ class Auth extends MY_Controller
                 ]
             ]);
             if ($sms->sent()) $this->user->update($user->id, ['otp_code' => $otp]);
-            
+
             $out = [
                 'input' => $record,
                 'status' => true,

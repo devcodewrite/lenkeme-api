@@ -177,7 +177,7 @@ class Users extends MY_Controller
         httpResponseJson($out);
     }
 
-     /**
+    /**
      * Show a list of post resources
      * @return http json
      */
@@ -209,15 +209,15 @@ class Users extends MY_Controller
         $query = $this->post->all();
 
         $where = [];
-        
-        if($auser){
+
+        if ($auser) {
             $query->group_start();
-            $query->where("CASE WHEN user_posts.user_id = {$auser->id} THEN user_posts.visibility IS NOT NULL ELSE user_posts.visibility='public' END",null,false);
+            $query->where("CASE WHEN user_posts.user_id = {$auser->id} THEN user_posts.visibility IS NOT NULL ELSE user_posts.visibility='public' END", null, false);
             $query->group_end();
             $query->group_start();
-            $query->where("CASE WHEN user_posts.user_id = {$auser->id} THEN user_posts.approval IS NOT NULL ELSE user_posts.approval='approved' END",null,false);
+            $query->where("CASE WHEN user_posts.user_id = {$auser->id} THEN user_posts.approval IS NOT NULL ELSE user_posts.approval='approved' END", null, false);
             $query->group_end();
-        }else {
+        } else {
             $where = array_merge($where, [
                 'user_posts.visibility' => 'public',
                 'user_posts.approval' => 'approved'
@@ -241,7 +241,7 @@ class Users extends MY_Controller
         httpResponseJson($out);
     }
 
-     /**
+    /**
      * Show a list of resources
      * @return http json
      */
@@ -324,6 +324,8 @@ class Users extends MY_Controller
         $gate = auth()->can('update', 'user', $this->user->find($id));
         if ($gate->allowed()) {
             $record = inputJson();
+            $record = $record ? $record : $this->input->post();
+
             $user = $this->user->update($id, $record);
             if ($user) {
                 $out = [

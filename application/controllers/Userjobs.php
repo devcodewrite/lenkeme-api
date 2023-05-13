@@ -13,10 +13,12 @@ class Userjobs extends MY_Controller
         $gate = auth()->can('create', 'userjob');
         if ($gate->allowed()) {
             $record = inputJson();
-          
+            $record = $record ? $record : $this->input->post();
+
+
             $userjob  = $this->userjob->create($record);
             $error = $this->session->flashdata('error_message');
-           
+
             if ($userjob) {
                 $out = [
                     'data' => $userjob,
@@ -27,7 +29,7 @@ class Userjobs extends MY_Controller
             } else {
                 $out = [
                     'status' => false,
-                    'message' => ($error?$error:"userjobs couldn't be created!")
+                    'message' => ($error ? $error : "userjobs couldn't be created!")
                 ];
             }
         } else {

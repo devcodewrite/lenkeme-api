@@ -13,10 +13,12 @@ class Favourites extends MY_Controller
         $gate = auth()->can('create', 'favourite');
         if ($gate->allowed()) {
             $record = inputJson();
-          
+            $record = $record ? $record : $this->input->post();
+
+
             $favourite  = $this->favourite->create($record);
             $error = $this->session->flashdata('error_message');
-           
+
             if ($favourite) {
                 $out = [
                     'data' => $favourite,
@@ -27,7 +29,7 @@ class Favourites extends MY_Controller
             } else {
                 $out = [
                     'status' => false,
-                    'message' => ($error?$error:"favourites couldn't be created!")
+                    'message' => ($error ? $error : "favourites couldn't be created!")
                 ];
             }
         } else {

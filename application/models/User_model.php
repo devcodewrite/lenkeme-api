@@ -59,18 +59,22 @@ class User_model extends CI_Model
                 return false;
             }
             $sjob = $this->job->find($jobs[0]);
-            if($sjob){
+            if ($sjob) {
                 $record['photo_url'] = $sjob['avatar'];
             }
         }
 
         if ($this->db->insert($this->table, $data)) {
             $id = $this->db->insert_id();
-            if(sizeof($jobs) > 0){
+            if (sizeof($jobs) > 0) {
                 $record['user_id'] = $id;
                 $this->userjob->create($record);
             }
-            $this->uploadPhoto($id);
+            if (isset($record['photo'])){
+                $path = $this->uploadPhoto($id);
+                $record2['photo_url'] = $path;
+                return $this->update($id, $record2);
+            }
             return $this->find($id);
         }
     }
@@ -82,20 +86,20 @@ class User_model extends CI_Model
      */
     public function update(int $id, array $record)
     {
-
         if (!$record) return;
-
         if (!empty($record['password'])) {
             $record['password'] = password_hash($record['password'], PASSWORD_DEFAULT);
         } else {
             unset($record['password']);
         }
+        if (isset($record['photo'])){
+            $path = $this->uploadPhoto($id);
+            $record['photo_url'] = $path;
+        }
         $data = $this->extract($record);
         $this->db->set($data);
         $this->db->where('id', $id);
         $this->db->update($this->table);
-        $this->uploadPhoto($id);
-
         return $this->find($id);
     }
 
@@ -133,9 +137,12 @@ class User_model extends CI_Model
      * @param string $field_name
      * @return Boolean
      */
-    public function uploadPhoto($id, string $field_name = 'photo', string $col_name = 'photo_url', $disp_error = true, $scale = '60%', $dim = ['w' => '100', 'h' => '100'])
+    public function uploadPhoto($id, string $field_name = 'photo', $scale = '90%', $dim = ['w' => '', 'h' => ''], $disp_error = true)
     {
-        $config['upload_path'] = './uploads/photos/' . $this->table;
+        $path = "uploads/photos/users/$id";
+        if (!is_dir($path)) mkdir("./$path", 0777, TRUE);
+
+        $config['upload_path'] = "./$path";
         $config['allowed_types'] = 'gif|jpg|png|jpeg';
         $config['file_name'] = uniqid($id);
         $this->load->library('upload', $config);
@@ -144,32 +151,23 @@ class User_model extends CI_Model
             $file_data = $this->upload->data();
 
             $resize['image_library'] = 'gd2';
-            $resize['create_thumb'] = TRUE;
+            $resize['create_thumb'] = FALSE;
             $resize['maintain_ratio'] = TRUE;
             $resize['quality'] = $scale;
             $resize['width'] = $dim['w'];
             $resize['height'] = $dim['h'];
             $resize['source_image'] = $file_data['full_path'];
-
             $this->load->library('image_lib', $resize);
 
             if (!$this->image_lib->resize()) {
-                if ($disp_error) {
-                    $this->session->set_flashdata('error_message', $this->image_lib->display_errors('', ''));
-                }
+                if ($disp_error) $this->session->set_flashdata('error_message', $this->image_lib->display_errors('', ''));
                 return false;
             }
         } else {
-            if ($disp_error) {
-                $this->session->set_flashdata('warning_message', $this->upload->display_errors('', ''));
-                return false;
-            }
-            return true;
+            if ($disp_error) $this->session->set_flashdata('error_message', $this->upload->display_errors('', ''));
+            return false;
         }
-        $data = [
-            $col_name => base_url('uploads/photos/' . $this->table . "/" . $file_data['file_name']),
-        ];
-        return $this->update($id, $data);
+        return base_url("$path/" . $file_data['file_name']);
     }
 
     /**
