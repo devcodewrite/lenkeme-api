@@ -43,8 +43,13 @@ class Sysuser_model extends CI_Model
         }
 
         if ($this->db->insert($this->table, $data)) {
-            $this->uploadPhoto($this->db->insert_id());
-            return $this->find($this->db->insert_id());
+            $id = $this->db->insert_id();
+            if (isset($_FILES['photo'])){
+                $path = $this->uploadPhoto($id);
+                $record2['photo_url'] = $path;
+                return $this->update($id, $record2);
+            }
+            return $this->find($id);
         }
     }
 

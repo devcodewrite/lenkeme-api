@@ -60,7 +60,7 @@ class User_model extends CI_Model
             }
             $sjob = $this->job->find($jobs[0]);
             if ($sjob) {
-                $record['photo_url'] = $sjob['avatar'];
+                $record['photo_url'] = $sjob->avatar;
             }
         }
 
