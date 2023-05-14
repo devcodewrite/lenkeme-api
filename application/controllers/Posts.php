@@ -174,7 +174,7 @@ class Posts extends MY_Controller
                     'data' => $post,
                     'input' => $record,
                     'status' => true,
-                    'message' => 'posts created successfully!'
+                    'message' =>  $error? $error:'posts created successfully!'
                 ];
             } else {
                 $out = [

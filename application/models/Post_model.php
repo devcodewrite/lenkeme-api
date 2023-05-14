@@ -148,7 +148,7 @@ class Post_model extends CI_Model
         if (!is_dir($path)) mkdir("./$path", 0777, TRUE);
 
         $config['upload_path'] = "./$path";
-        $config['allowed_types'] = 'gif|jpg|png|jpeg|heic';
+        $config['allowed_types'] = 'gif|jpg|png|jpeg';
         $config['file_name'] = uniqid($id);
         $this->load->library('upload', $config);
 
