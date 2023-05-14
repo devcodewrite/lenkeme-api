@@ -61,22 +61,29 @@ class Sysuser_model extends CI_Model
     public function update(int $id, array $record)
     {
         if (!$record && !isset($_FILES['photo'])) return;
-        if (!empty($record['password'])) {
+
+        if (!empty($record['password']) && !empty($record['old_password'])) {
+
+            $user = $this->all2()->where("{$this->table}.id", $id)->get()->row();
+            if (!password_verify($record['old_password'], $user->password)) {
+                $this->session->set_flashdata('error_message', "Invalid old password!");
+                $this->session->set_flashdata('error_code', 16);
+                return false;
+            }
+
             $record['password'] = password_hash($record['password'], PASSWORD_DEFAULT);
         } else {
-            unset($record['password']);
+            unset($record['password']); // ensure no empty password update
         }
-        if (isset($_FILES['photo'])){
+
+        if (isset($_FILES['photo'])) {
             $path = $this->uploadPhoto($id);
             $record['photo_url'] = $path;
         }
-
         $data = $this->extract($record);
         $this->db->set($data);
         $this->db->where('id', $id);
         $this->db->update($this->table);
-        $this->uploadPhoto($id);
-
         return $this->find($id);
     }
 
