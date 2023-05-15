@@ -58,7 +58,7 @@ class Finder extends MY_Controller
             $query->group_start();
             $query->or_like('jobs.title', $inputs['keywords'],  'both');
             $query->or_like('jobs.description', $inputs['keywords'],  'both');
-            $query->or_like('concat("%\'",jobs.title," in ",user_jobs.location,"\'%")', $inputs['keywords'],  'both', false);
+            $query->or_like('concat("%\'",jobs.title," __ ",users.address,"\'%")', $inputs['keywords'],  'both', false);
             $query->or_like('users.city', $inputs['keywords'],  'both');
             $query->group_end();
 
@@ -110,7 +110,7 @@ class Finder extends MY_Controller
         $where = ['users.status' => 'active', 'users.user_type' => 'artisan'];
 
         if (stripos(trim($this->input->get('keywords')), '@') === 0) {
-          //  $auser = auth()->user();
+            //  $auser = auth()->user();
 
             $query = $this->user->all2()
                 ->distinct()
@@ -139,20 +139,29 @@ class Finder extends MY_Controller
             ];
             httpResponseJson($out);
         } else {
+
+            $conj = "";
+            foreach (explode(' ', trim($inputs['keywords'])) as $key) {
+                if (in_array(strtolower(trim($key)), ['in', 'at', 'from'])) {
+                    $conj = " $key ";
+                    break;
+                }
+            }
             $q =
-                '(CASE WHEN  jobs.title LIKE "%' . $inputs['keywords']
-                . '%" THEN  concat(jobs.title," in ",user_jobs.location) WHEN concat("%\'",jobs.title," in ",user_jobs.location,"\'%") LIKE "%'
-                . $inputs['keywords'] . '%" THEN concat(jobs.title," in ",user_jobs.location) WHEN jobs.description LIKE "%'
-                . $inputs['keywords'] . '%" THEN jobs.description WHEN user_jobs.location LIKE "%'
-                . $inputs['keywords'] . '%" THEN user_jobs.location WHEN users.city LIKE "%'
-                . $inputs['keywords'] . '%" THEN concat(user_jobs.location,",",users.city) ELSE concat(jobs.title," in ",users.city) END)';
+                '(CASE WHEN  jobs.title LIKE "%' . trim($inputs['keywords'])
+                . '%" THEN concat(jobs.title,"' . $conj . '") WHEN users.address LIKE "%'
+                . trim($inputs['keywords']) . '%" THEN concat(jobs.title," ",users.address,",",users.city) WHEN users.city LIKE "%'
+                . trim($inputs['keywords']) . '%" THEN concat(jobs.title,",",users.city) WHEN concat(jobs.title,"' . $conj . '",ifnull(users.city,"")) LIKE "%'
+                . trim($inputs['keywords']) . '%" THEN concat(jobs.title,"' . $conj . '",ifnull(users.city,""))  WHEN concat(jobs.title,"' . $conj . '",ifnull(users.address,"")) LIKE "%'
+                . trim($inputs['keywords']) . '%" THEN concat(jobs.title,"' . ($conj==''?' ':$conj) . '",ifnull(users.address,""),",",users.city) WHEN jobs.description LIKE "%'
+                . trim($inputs['keywords']) . '%" THEN jobs.description ELSE concat(jobs.title,"' . $conj . '",users.city) END)';
 
             $query = $this->job->all2()
                 ->select([
                     "$q as suggestion",
                     'jobs.title',
                     'jobs.description',
-                    'user_jobs.location',
+                    'users.address',
                     'users.city',
                     'user_jobs.user_id'
                 ], false)
@@ -160,10 +169,12 @@ class Finder extends MY_Controller
                 ->join('users', 'users.id=user_jobs.user_id');
 
             $query->group_start();
-            $query->or_like('jobs.title', $inputs['keywords'],  'both');
-            $query->or_like('jobs.description', $inputs['keywords'],  'both');
-            $query->or_like('concat("%\'",jobs.title," in ",user_jobs.location,"\'%")', $inputs['keywords'],  'both', false);
-            $query->or_like('users.city', $inputs['keywords'],  'both');
+            $query->or_like('jobs.title', trim($inputs['keywords']),  'both');
+            $query->or_like('jobs.description', trim($inputs['keywords']),  'both');
+            $query->or_like('concat(jobs.title,"' . $conj . '",ifnull(users.city,""))', trim($inputs['keywords']),  'both');
+            $query->or_like('concat(jobs.title,"' . ($conj==''?' ':$conj) . '",ifnull(users.address,""),",",users.city)', trim($inputs['keywords']),  'both');
+            $query->or_like('users.city', trim($inputs['keywords']),  'both');
+            $query->or_like('users.address', trim($inputs['keywords']),  'both');
             $query->group_end();
 
             if ($this->input->get('jobs')) {
@@ -174,6 +185,7 @@ class Finder extends MY_Controller
                 $query->group_end();
             }
             $query->where($where);
+            if (empty(trim($conj))) $query->group_by('user_jobs.job_id');
 
             $out = json($query, $page, $length, $inputs, function ($item) {
                 return (object)array_merge((array)$item, [
