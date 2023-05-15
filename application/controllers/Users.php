@@ -79,7 +79,7 @@ class Users extends MY_Controller
      */
     public function artisans($id = null)
     {
-        $auser = auth()->user();
+       // $auser = auth()->user();
         $gate = auth()->can('viewAny', 'user');
         if ($gate->denied()) {
             $out = [
@@ -102,13 +102,7 @@ class Users extends MY_Controller
             'users.status' => 'active',
             'users.user_type' => 'artisan',
         ];
-        if ($auser) {
-            $query->group_start();
-            $query->where("CASE WHEN users.id = {$auser->id} THEN 1 ELSE users.artisan_verified_at IS NOT NULL END", null, false);
-            $query->group_end();
-        } else {
-            $query->where('users.artisan_verified_at !=', null);
-        }
+   
         $query->where($where)->where('users.phone_verified_at !=', null);
 
         $out = json($query, $page, $length, $inputs, function ($item) use ($authUser) {

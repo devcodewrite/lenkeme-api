@@ -16,7 +16,7 @@ class Finder extends MY_Controller
         $authUser = auth()->user();
         $where = ['users.status' => 'active', 'users.user_type' => 'artisan'];
 
-        $auser = auth()->user();
+        //$auser = auth()->user();
         if (stripos(trim($this->input->get('keywords')), '@') === 0) {
 
             $query = $this->user->all()
@@ -25,14 +25,6 @@ class Finder extends MY_Controller
             $query->group_start();
             $query->like('users.username', ltrim($inputs['keywords'], '@'), 'both');
             $query->group_end();
-
-            if ($auser) {
-                $query->group_start();
-                $query->where("CASE WHEN users.id = {$auser->id} THEN 1 ELSE users.artisan_verified_at IS NOT NULL END", null, false);
-                $query->group_end();
-            } else {
-                $query->where('users.artisan_verified_at !=', null);
-            }
 
             $query->where($where);
             $out = json($query, $page, $length, $inputs, function ($item) use ($authUser) {
@@ -78,14 +70,6 @@ class Finder extends MY_Controller
                 $query->group_end();
             }
 
-            if ($auser) {
-                $query->group_start();
-                $query->where("CASE WHEN users.id = {$auser->id} THEN 1 ELSE users.artisan_verified_at IS NOT NULL END", null, false);
-                $query->group_end();
-            } else {
-                $query->where('users.artisan_verified_at !=', null);
-            }
-
             $query->where($where);
 
             $out = json($query, $page, $length, $inputs, function ($item) use ($authUser) {
@@ -126,7 +110,7 @@ class Finder extends MY_Controller
         $where = ['users.status' => 'active', 'users.user_type' => 'artisan'];
 
         if (stripos(trim($this->input->get('keywords')), '@') === 0) {
-            $auser = auth()->user();
+          //  $auser = auth()->user();
 
             $query = $this->user->all2()
                 ->distinct()
@@ -135,14 +119,6 @@ class Finder extends MY_Controller
             $query->group_start();
             $query->like('users.username', ltrim($inputs['keywords'], '@'), 'both');
             $query->group_end();
-
-            if ($auser) {
-                $query->group_start();
-                $query->where("CASE WHEN users.id = {$auser->id} THEN 1 ELSE users.artisan_verified_at IS NOT NULL END", null, false);
-                $query->group_end();
-            } else {
-                $query->where('users.artisan_verified_at !=', null);
-            }
 
             $query->where($where);
             $out = json($query, $page, $length, $inputs, function ($item) {
