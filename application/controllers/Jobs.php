@@ -11,6 +11,7 @@ class jobs extends MY_Controller
     {
         if ($id !== null) {
             $gate = auth()->can('view', 'job');
+            
             if ($gate->allowed()) {
                 $job  = $this->job->find($id);
                 if ($job) {
@@ -43,10 +44,14 @@ class jobs extends MY_Controller
                 return;
             }
 
+            $auser = auth()->user();
+            $user_id = $auser?$auser->id:0;
+            
             $page = $this->input->get('page');
             $length = $this->input->get('length');
             $inputs = $this->input->get();
-            $query = $this->job->all();
+            $jquery = "(SELECT count(user_jobs.job_id) FROM user_jobs WHERE user_id=$user_id AND job_id=jobs.id) as checked";
+            $query = $this->job->all()->select($jquery, false);
 
             $where = [];
 
@@ -76,6 +81,7 @@ class jobs extends MY_Controller
     {
         $gate = auth()->can('create', 'job');
         if ($gate->allowed()) {
+           
             $record = inputJson();
             $record = $record ? $record : $this->input->post();
 
