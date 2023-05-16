@@ -25,7 +25,8 @@ class Userjob_model extends CI_Model
                 array_push($data2, array_merge($data, ['job_id' => $job_id]));
             }
 
-            return $this->db->insert_batch($this->table, $data2);
+            $this->db->insert_batch($this->table, $data2);
+            return $this->db->affected_rows() > 0;
         }
         return $this->db->insert($this->table, $data);
     }
