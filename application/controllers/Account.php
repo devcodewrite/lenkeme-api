@@ -95,9 +95,10 @@ class Account extends MY_Controller
             $record = $record ? $record : $this->input->post();
             $record['user_id'] = $user->id;
             $userjobs = $this->userjob->create($record);
+            
             if ($userjobs) {
-                $user = $this->user->update($user->id, ['user_type' => 'artisan']);
-                if ($user) $user->jobs = $this->userjob->find($user->id)->result();
+                unset($record['user_id']);
+                $user = $this->user->update($user->id, array_merge($record,['user_type' => 'artisan']));
             }
             if ($userjobs) {
                 $out = [
