@@ -40,7 +40,7 @@ class Post_model extends CI_Model
      * @param $id
      * @return Boolean
      */
-    public function update(int $id, array $data =null)
+    public function update(int $id, array $data = null)
     {
         $data = $this->extract($data);
         $post = $this->find($id);
@@ -63,6 +63,21 @@ class Post_model extends CI_Model
         $this->db->set($data);
         $this->db->where('id', $id);
         $this->db->update($this->table);
+
+        if (isset($data['approval'])) {
+            $sysuser = auth()->user();
+            /* $gate = auth()->can('approve', 'post', $post);
+            if($gate->allowed()){
+
+            }
+            */
+            if ($data['approval'] === 'approved') {
+                $approval = $this->postapproval->create([
+                    'user_post_id' => $id,
+                    'system_user_id' => $sysuser->id
+                ]);
+            }
+        }
         return $this->find($id);
     }
 

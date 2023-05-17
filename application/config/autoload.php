@@ -141,6 +141,7 @@ $autoload['model'] = array(
     'user_model' => 'user',
     'favourite_model' => 'favourite',
     'userjob_model' => 'userjob',
+    'postapproval_model' => 'postapproval',
     'post_model' => 'post',
     'job_model' => 'job',
     'sysuser_model' => 'sysuser',
