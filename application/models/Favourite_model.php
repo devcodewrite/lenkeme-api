@@ -31,12 +31,10 @@ class Favourite_model extends CI_Model
      * @param $id
      * @return Boolean
      */
-    public function delete(int $userId, int $id)
+    public function delete(int $id)
     {
-        $role = $this->find($userId, $id);
-            return $this->db->delete($this->table, ['user_id1' => $id, 'user_id'=>$userId]);
-        
-        return false;
+        $userId = auth()->user()->id;
+        return $this->db->delete($this->table, ['user_id1' => $id, 'user_id'=>$userId]);
     }
 
     /**
