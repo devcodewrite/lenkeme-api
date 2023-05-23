@@ -56,7 +56,7 @@ class Favourites extends MY_Controller
             ];
             return  httpResponseJson($out);
         }
-        $gate = auth()->can('delete', 'favourite', $this->favourite->find($id));
+        $gate = auth()->can('delete', 'favourite', $this->favourite->find($auser->id, $id));
         if ($gate->allowed()) {
             if ($this->favourite->delete($id)) {
                 $out = [
