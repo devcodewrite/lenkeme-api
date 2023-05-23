@@ -86,6 +86,10 @@ class Posts extends MY_Controller
             $gate = auth()->can('view', 'post');
             if ($gate->allowed()) {
                 $post  = $this->post->find($id);
+                if ($auser) {
+                    $favUser = $this->favourite->find($auser->id, $post->user_id);
+                    $post->user->is_favourite = $favUser ? true : false;
+                }
                 if ($post) {
                     $out = [
                         'data' => $post,
@@ -121,9 +125,7 @@ class Posts extends MY_Controller
             $inputs = $this->input->get();
             $query = $this->post->all();
 
-            $where = [
-            ];
-           
+            $where = [];
             if($auser){
                 $query->group_start();
                 $query->where("CASE WHEN user_posts.user_id = {$auser->id} THEN user_posts.visibility IS NOT NULL ELSE user_posts.visibility='public' END",null,false);
@@ -139,8 +141,12 @@ class Posts extends MY_Controller
             }
             $query->where($where);
 
-            $out = json($query, $page, $length, $inputs, function ($item) {
+            $out = json($query, $page, $length, $inputs, function ($item) use($auser) {
                 $user = $this->user->find($item->user_id);
+                if ($auser) {
+                    $favUser = $this->favourite->find($auser->id, $item->id);
+                    $user->is_favourite = $favUser ? true : false;
+                }
                 $item->user = $user;
                 return $item;
             });
