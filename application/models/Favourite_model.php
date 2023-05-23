@@ -10,7 +10,7 @@ class Favourite_model extends CI_Model
         if (!$record) return;
         $record['user_id'] = auth()->user()->id;
 
-        if($record['user_id1'] ===intval($record['user_id'])){
+        if(intval($record['user_id1']) ===intval($record['user_id'])){
             $this->session->set_flashdata('error_message', "You cannot favourite yourself!");
             return false;
         }
