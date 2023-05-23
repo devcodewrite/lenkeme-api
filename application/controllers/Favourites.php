@@ -47,6 +47,15 @@ class Favourites extends MY_Controller
      */
     public function delete(int $id = null)
     {
+        $auser = auth()->authorized();
+        if(!$auser){
+            $out = [
+                'status' => false, 
+                'code' => $auser->error_code(),
+                'message' => $auser->error()
+            ];
+            return  httpResponseJson($out);
+        }
         $gate = auth()->can('delete', 'favourite', $this->favourite->find($id));
         if ($gate->allowed()) {
             if ($this->favourite->delete($id)) {
