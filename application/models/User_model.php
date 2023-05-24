@@ -111,6 +111,8 @@ class User_model extends CI_Model
             $record['photo_url'] = $path;
         }
         $data = $this->extract($record);
+
+        if(sizeof($data) === 0) return $this->find($id);
         $this->db->set($data);
         $this->db->where('id', $id);
         $this->db->update($this->table);
