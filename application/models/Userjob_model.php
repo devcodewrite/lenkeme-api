@@ -20,9 +20,6 @@ class Userjob_model extends CI_Model
                     $this->session->set_flashdata('error_code', 14);
                     return false;
                 }
-                if ($this->where(['user_id' => $record['user_id'], 'job_id' => $job_id])->num_rows() > 0) {
-                    continue;
-                }
                 array_push($data2, array_merge($data, ['job_id' => $job_id]));
             }
             if (sizeof($data2) === 0) return true;
