@@ -161,7 +161,7 @@ class User_model extends CI_Model
      */
     public function uploadPhoto($id, string $field_name = 'photo', $scale = '90%', $dim = ['w' => '', 'h' => ''], $disp_error = true)
     {
-        $path = "uploads/photos/users";
+        $path = "uploads/$field_name/users";
         if (!is_dir($path)) mkdir("./$path", 0777, TRUE);
 
         $config['upload_path'] = "./$path";
