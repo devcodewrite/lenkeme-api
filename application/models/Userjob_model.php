@@ -8,7 +8,7 @@ class Userjob_model extends CI_Model
     public function create(array $record)
     {
         if (!$record) return;
-        $record['user_id'] = isset($record['user_id'])?$record['user_id']:auth()->user()->id;
+        $record['user_id'] = isset($record['user_id']) ? $record['user_id'] : auth()->user()->id;
         $data = $this->extract($record);
 
         if (isset($record['jobs'])) {
@@ -23,8 +23,9 @@ class Userjob_model extends CI_Model
                 if ($this->where(['user_id' => $record['user_id'], 'job_id' => $job_id])->num_rows() > 0) {
                     continue;
                 }
-                array_push($data2, array_merge($data, ['job_id' => $job_id, 'user_id' => $record['user_id'] ]));
+                array_push($data2, array_merge($data, ['job_id' => $job_id]));
             }
+            if (sizeof($data2) === 0) return true;
             $this->delete($record['user_id']);
             $this->db->insert_batch($this->table, $data2);
             return $this->db->affected_rows() > 0;
@@ -54,7 +55,7 @@ class Userjob_model extends CI_Model
      */
     public function delete($id)
     {
-        return $this->db->delete($this->table, ['user_id'=>$id]);
+        return $this->db->delete($this->table, ['user_id' => $id]);
     }
 
     /**
