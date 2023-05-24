@@ -110,6 +110,12 @@ class User_model extends CI_Model
             $path = $this->uploadPhoto($id);
             $record['photo_url'] = $path;
         }
+
+        if (isset($_FILES['cover_photo'])) {
+            $path = $this->uploadPhoto($id,'cover_photo');
+            $record['cover_photo_url'] = $path;
+        }
+
         $data = $this->extract($record);
 
         if(sizeof($data) === 0) return $this->find($id);
