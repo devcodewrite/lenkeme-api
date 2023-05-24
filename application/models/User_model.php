@@ -102,6 +102,10 @@ class User_model extends CI_Model
             unset($record['password']); // ensure no empty password update
         }
 
+        if(isset($record['jobs'])){
+            $this->userjob->create(['jobs'=>$record['jobs'], 'user_id'=>$id]);
+        }
+
         if (isset($_FILES['photo'])) {
             $path = $this->uploadPhoto($id);
             $record['photo_url'] = $path;

@@ -25,7 +25,7 @@ class Userjob_model extends CI_Model
                 }
                 array_push($data2, array_merge($data, ['job_id' => $job_id]));
             }
-
+            $this->delete($record['user_id']);
             $this->db->insert_batch($this->table, $data2);
             return $this->db->affected_rows() > 0;
         }
@@ -52,13 +52,9 @@ class Userjob_model extends CI_Model
      * @param $id
      * @return Boolean
      */
-    public function delete(int $id)
+    public function delete($id)
     {
-        $role = $this->find($id);
-        if ($this->perm->delete($role->permission_id))
-            return $this->db->delete($this->table, ['id' => $id]);
-
-        return false;
+        return $this->db->delete($this->table, ['user_id'=>$id]);
     }
 
     /**

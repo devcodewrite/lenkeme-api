@@ -47,9 +47,10 @@ class Userjobs extends MY_Controller
      */
     public function delete(int $id = null)
     {
-        $gate = auth()->can('delete', 'userjob', $this->userjob->find($id));
+        $user = auth()->user();
+        $gate = auth()->can('delete', 'userjob', $this->userjob->find($user->id));
         if ($gate->allowed()) {
-            if ($this->userjob->delete($id)) {
+            if ($this->userjob->delete($user->id, $id)) {
                 $out = [
                     'status' => true,
                     'message' => 'userjob data deleted successfully!'
