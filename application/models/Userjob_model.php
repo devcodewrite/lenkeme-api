@@ -11,7 +11,7 @@ class Userjob_model extends CI_Model
         $data = $this->extract($record);
 
         if (isset($record['jobs'])) {
-            $userId = isset($record['user_id'])?$record['user_id']:auth()->user()->id;
+            $record['user_id'] = isset($record['user_id'])?$record['user_id']:auth()->user()->id;
             $data2 = [];
             $jobs = explode(',', $record['jobs']);
             foreach ($jobs as $job_id) {
@@ -20,7 +20,7 @@ class Userjob_model extends CI_Model
                     $this->session->set_flashdata('error_code', 14);
                     return false;
                 }
-                if ($this->where(['user_id' => $userId, 'job_id' => $job_id])->num_rows() > 0) {
+                if ($this->where(['user_id' => $record['user_id'], 'job_id' => $job_id])->num_rows() > 0) {
                     continue;
                 }
                 array_push($data2, array_merge($data, ['job_id' => $job_id]));
