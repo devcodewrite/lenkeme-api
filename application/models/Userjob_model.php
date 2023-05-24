@@ -8,10 +8,10 @@ class Userjob_model extends CI_Model
     public function create(array $record)
     {
         if (!$record) return;
+        $record['user_id'] = isset($record['user_id'])?$record['user_id']:auth()->user()->id;
         $data = $this->extract($record);
 
         if (isset($record['jobs'])) {
-            $record['user_id'] = isset($record['user_id'])?$record['user_id']:auth()->user()->id;
             $data2 = [];
             $jobs = explode(',', $record['jobs']);
             foreach ($jobs as $job_id) {
