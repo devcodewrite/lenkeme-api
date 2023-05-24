@@ -23,7 +23,7 @@ class Userjob_model extends CI_Model
                 if ($this->where(['user_id' => $record['user_id'], 'job_id' => $job_id])->num_rows() > 0) {
                     continue;
                 }
-                array_push($data2, array_merge($data, ['job_id' => $job_id]));
+                array_push($data2, array_merge($data, ['job_id' => $job_id, 'user_id' => $record['user_id'] ]));
             }
             $this->delete($record['user_id']);
             $this->db->insert_batch($this->table, $data2);
