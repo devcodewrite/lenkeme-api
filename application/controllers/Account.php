@@ -42,7 +42,7 @@ class Account extends MY_Controller
         httpResponseJson($out);
     }
 
-     /**
+    /**
      * Update a resource
      * print json Response
      */
@@ -69,7 +69,7 @@ class Account extends MY_Controller
                 $out = [
                     'status' => false,
                     'code' => $error_code,
-                    'message' => $error?$error:"User couldn't be updated!"
+                    'message' => $error ? $error : "User couldn't be updated!"
                 ];
             }
         } else {
@@ -95,10 +95,10 @@ class Account extends MY_Controller
             $record = $record ? $record : $this->input->post();
             $record['user_id'] = $user->id;
             $userjobs = $this->userjob->create($record);
-            
+
             if ($userjobs) {
                 unset($record['user_id']);
-                $user = $this->user->update($user->id, array_merge($record,['user_type' => 'artisan']));
+                $user = $this->user->update($user->id, array_merge($record, ['user_type' => 'artisan']));
             }
             if ($userjobs) {
                 $out = [
@@ -179,12 +179,18 @@ class Account extends MY_Controller
 
         $where = ['user_id' => $user->id];
 
-        if ($this->input->get('status'))
-            $where = array_merge($where, ['posts.status' => $inputs['status']]);
+        if ($this->input->get('approval'))
+            $where = array_merge($where, ['user_posts.approval' => $inputs['approval']]);
+
+        if ($this->input->get('visibility'))
+            $where = array_merge($where, ['user_posts.visibility' => $inputs['visibility']]);
 
         $query->where($where);
 
-        $out = json($query, $page, $length, $inputs);
+        $out = json($query, $page, $length, $inputs, function ($item)use($user) {
+            $item->user = $user;
+            return $item;
+        });
         if ($out)
             $out = array_merge($out, [
                 'input' => $this->input->get(),
