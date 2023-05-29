@@ -86,7 +86,7 @@ class User_model extends CI_Model
      */
     public function update(int $id, array $record)
     {
-        if (!$record && sizeof($_FILES)===0) return;
+        if (!$record && !isset($_FILES['photo']) && !isset($_FILES['cover_photo'])) return;
 
         if (!empty($record['password']) && !empty($record['old_password'])) {
 
