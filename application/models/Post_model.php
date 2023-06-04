@@ -166,7 +166,8 @@ class Post_model extends CI_Model
 
         return
             $this->db->select($fields, true)
-            ->from($this->table);
+            ->from($this->table)
+            ->where($where);
     }
 
     /**
