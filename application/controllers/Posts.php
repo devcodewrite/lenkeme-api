@@ -242,12 +242,12 @@ class Posts extends MY_Controller
             if ($this->post->delete($id)) {
                 $out = [
                     'status' => true,
-                    'message' => 'post data deleted successfully!'
+                    'message' => 'post deleted successfully!'
                 ];
             } else {
                 $out = [
                     'status' => false,
-                    'message' => "post data couldn't be deleted!"
+                    'message' => "post couldn't be deleted!"
                 ];
             }
         } else {
