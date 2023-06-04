@@ -106,7 +106,10 @@ class Post_model extends CI_Model
         $this->db->set(['deleted_at'=>null]);
         $this->db->where('id', $id);
         $this->db->update($this->table);
-        return $this->db->affected_rows() > 0;
+         if($this->db->affected_rows() > 0){
+            return $this->find($id);
+         }
+         return false;
     }
 
     /**
