@@ -52,7 +52,7 @@ class Posts extends MY_Controller
 
             if ($this->input->get('approval'))
                 $where = array_merge($where, ['user_posts.approval' => $inputs['approval']]);
-            
+
             if ($this->input->get('visibility'))
                 $where = array_merge($where, ['user_posts.visibility' => $inputs['visibility']]);
 
@@ -126,14 +126,14 @@ class Posts extends MY_Controller
             $query = $this->post->all();
 
             $where = [];
-            if($auser){
+            if ($auser) {
                 $query->group_start();
-                $query->where("CASE WHEN user_posts.user_id = {$auser->id} THEN user_posts.visibility IS NOT NULL ELSE user_posts.visibility='public' END",null,false);
+                $query->where("CASE WHEN user_posts.user_id = {$auser->id} THEN user_posts.visibility IS NOT NULL ELSE user_posts.visibility='public' END", null, false);
                 $query->group_end();
                 $query->group_start();
-                $query->where("CASE WHEN user_posts.user_id = {$auser->id} THEN user_posts.approval IS NOT NULL ELSE user_posts.approval='approved' END",null,false);
+                $query->where("CASE WHEN user_posts.user_id = {$auser->id} THEN user_posts.approval IS NOT NULL ELSE user_posts.approval='approved' END", null, false);
                 $query->group_end();
-            }else {
+            } else {
                 $where = array_merge($where, [
                     'user_posts.visibility' => 'public',
                     'user_posts.approval' => 'approved'
@@ -141,7 +141,7 @@ class Posts extends MY_Controller
             }
             $query->where($where);
 
-            $out = json($query, $page, $length, $inputs, function ($item) use($auser) {
+            $out = json($query, $page, $length, $inputs, function ($item) use ($auser) {
                 $user = $this->user->find($item->user_id);
                 if ($auser) {
                     $favUser = $this->favourite->find($auser->id, $item->id);
@@ -180,7 +180,7 @@ class Posts extends MY_Controller
                     'data' => $post,
                     'input' => $record,
                     'status' => true,
-                    'message' =>  $error? $error:'posts created successfully!'
+                    'message' =>  $error ? $error : 'posts created successfully!'
                 ];
             } else {
                 $out = [
@@ -259,7 +259,7 @@ class Posts extends MY_Controller
         httpResponseJson($out);
     }
 
-     /**
+    /**
      * Delete a resource
      * print json Response
      */
@@ -267,9 +267,11 @@ class Posts extends MY_Controller
     {
         $gate = auth()->can('delete', 'post', $this->post->find($id));
         if ($gate->allowed()) {
-            if ($this->post->restore($id)) {
+            $data = $this->post->restore($id);
+            if ($data) {
                 $out = [
                     'status' => true,
+                    'data' => $data,
                     'message' => 'post restored successfully!'
                 ];
             } else {
