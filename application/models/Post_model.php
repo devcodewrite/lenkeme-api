@@ -40,9 +40,11 @@ class Post_model extends CI_Model
      * @param $id
      * @return Boolean
      */
-    public function update(int $id, array $data = null)
+    public function update(int $id, array $record = null)
     {
-        $data = $this->extract($data);
+        if(sizeof($record) === 0) return;
+        
+        $data = $this->extract($record);
         $post = $this->find($id);
 
         if (isset($_FILES['images'])) {
