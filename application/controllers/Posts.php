@@ -258,4 +258,32 @@ class Posts extends MY_Controller
         }
         httpResponseJson($out);
     }
+
+     /**
+     * Delete a resource
+     * print json Response
+     */
+    public function restore(int $id = null)
+    {
+        $gate = auth()->can('delete', 'post', $this->post->find($id));
+        if ($gate->allowed()) {
+            if ($this->post->restore($id)) {
+                $out = [
+                    'status' => true,
+                    'message' => 'post restored successfully!'
+                ];
+            } else {
+                $out = [
+                    'status' => false,
+                    'message' => "post couldn't be restored!"
+                ];
+            }
+        } else {
+            $out = [
+                'status' => false,
+                'message' => $gate->message
+            ];
+        }
+        httpResponseJson($out);
+    }
 }
