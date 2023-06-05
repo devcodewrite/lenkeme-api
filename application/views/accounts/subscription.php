@@ -36,27 +36,14 @@
 </head>
 
 <body class="provider-body">
-
-	
 	<div class="main-wrapper">
 		<div class="page-wrapper">
 			<div class="content container-fluid">
-				
 				<div class="row">	
 					<div class="col-md-6">	
 						<div class="widget-title">
 							<h4>Subscription</h4>
 						</div>
-					</div>
-					<div class="col-md-6 text-md-end">	
-						<ul class="subs-list">
-							<li>
-								<a href="provider-subscription.html" class="active">Plan & Pricing</a>
-							</li>
-							<li>
-								<a href="provider-addons.html">Addons</a>
-							</li>
-						</ul>
 					</div>
 				</div>
 									
