@@ -350,4 +350,9 @@ class Users extends MY_Controller
 
         httpResponseJson($out);
     }
+
+    public function subscription()
+    {
+        $this->load->view('accounts/subscription');
+    }
 }

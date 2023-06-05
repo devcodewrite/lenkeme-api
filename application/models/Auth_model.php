@@ -3,7 +3,9 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class Auth_model extends CI_Model
 {
-     protected $excluded_uris = [];
+     protected $excluded_uris = [
+          'users/subscription'
+     ];
      public function hasPermission(string $uri = null)
      {
           if (!$this->checkPermissions($uri)) {
@@ -14,6 +16,9 @@ class Auth_model extends CI_Model
 
      private function checkPermissions(string $uri = null)
      {
+          if (!$uri) return false;
+          if (in_array($uri, $this->excluded_uris)) return true;
+
           // verify api key for app
           $api_key = $this->getHeaderApiKey();
           $where = ['api_key' => $api_key, 'request' => 'approved'];
@@ -21,8 +26,6 @@ class Auth_model extends CI_Model
                httpReponseError('Unauthorized Access! Invalid Api Key', 401);
                return false;
           }
-          if (!$uri) return false;
-          if (in_array($uri, $this->excluded_uris)) return true;
 
           return true;
      }
