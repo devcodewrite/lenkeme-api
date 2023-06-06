@@ -31,7 +31,7 @@
 	<link rel="stylesheet" href="<?=base_url('assets/plugins/datatables/datatables.min.css'); ?>">
 
 	<!-- Main CSS -->
-	<link rel="stylesheet" href="<?=base_url('assets/css/style.css'); ?>">
+	<link rel="stylesheet" href="<?=base_url('assets/css/style.css?v='.uniqid()); ?>">
 	
 </head>
 

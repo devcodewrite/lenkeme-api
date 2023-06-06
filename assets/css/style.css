@@ -8157,7 +8157,7 @@ html.menu-opened body {
 }
 .provider-body .page-wrapper {
     background-color: #fff;
-    padding-top: 76px;
+    /*padding-top: 76px; */
     min-height: calc(100vh - 40px);
 	margin-left: 270px;
 	position: relative;
