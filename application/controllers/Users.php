@@ -79,7 +79,7 @@ class Users extends MY_Controller
      */
     public function artisans($id = null)
     {
-       // $auser = auth()->user();
+        // $auser = auth()->user();
         $gate = auth()->can('viewAny', 'user');
         if ($gate->denied()) {
             $out = [
@@ -102,7 +102,7 @@ class Users extends MY_Controller
             'users.status' => 'active',
             'users.user_type' => 'artisan',
         ];
-   
+
         $query->where($where)->where('users.phone_verified_at !=', null);
 
         $out = json($query, $page, $length, $inputs, function ($item) use ($authUser) {
@@ -353,6 +353,17 @@ class Users extends MY_Controller
 
     public function subscription()
     {
-        $this->load->view('accounts/subscription');
+        $renewal = $this->input->get('renewal');
+        $where = ['renewal' => $renewal?$renewal:'monthly'];
+        $subs = $this->subscription->all()
+            ->where($where)
+            ->order_by('price', 'asc')
+            ->get()
+            ->result();
+        $data = [
+            'subscriptions' => $subs,
+            'renewal' => $renewal,
+        ];
+        $this->load->view('accounts/subscription', $data);
     }
 }
