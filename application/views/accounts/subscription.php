@@ -46,7 +46,7 @@
                         </div>
                     </div>
                     <div class="col-md-6 text-md-end">
-                        <ul class="subs-list">
+                        <ul class="subs-list d-flex" style="overflow:auto;">
                             <li>
                                 <a href="?renewal=monthly" class="<?= $renewal === 'monthly' || $renewal === null ? 'active' : '' ?>">Every Month</a>
                             </li>
