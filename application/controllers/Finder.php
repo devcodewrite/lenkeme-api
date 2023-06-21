@@ -165,8 +165,8 @@ class Finder extends MY_Controller
                     'users.city',
                     'user_jobs.user_id'
                 ], false)
-                ->join('user_jobs', 'user_jobs.job_id=jobs.id')
-                ->join('users', 'users.id=user_jobs.user_id');
+                ->join('user_jobs', 'user_jobs.job_id=jobs.id','left')
+                ->join('users', 'users.id=user_jobs.user_id', 'left');
 
             $query->group_start();
             $query->or_like('jobs.title', trim($inputs['keywords']),  'both');
