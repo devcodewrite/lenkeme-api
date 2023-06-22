@@ -9,25 +9,16 @@ class Settings extends MY_Controller
    */
   public function index()
   {
-    $gate = auth()->can('view', 'setting');
-
-    if ($gate->allowed()) {
-      $setting = $this->setting->all();
-      if ($setting) {
-        $out = [
-          'data' => $setting,
-          'status' => true,
-        ];
-      } else {
-        $out = [
-          'status' => false,
-          'message' => "No setting found!"
-        ];
-      }
+    $setting = $this->setting->all();
+    if ($setting) {
+      $out = [
+        'data' => $setting,
+        'status' => true,
+      ];
     } else {
       $out = [
         'status' => false,
-        'message' => $gate->message
+        'message' => "No setting found!"
       ];
     }
     httpResponseJson($out);
