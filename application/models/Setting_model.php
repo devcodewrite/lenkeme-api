@@ -40,32 +40,23 @@ class Setting_model extends CI_Model
     }
 
     public function canViewAny($user){
-        $role = $this->user->find($user->id)->role;
-        if ($role)
-            return
-                $role->permission->is_admin === '1'
-                ? auth()->allow() : (in_array('view', explode(',', $role->permission->settings))?auth()->allow()
-                :auth()->deny("You don't have permission to view this recored."));
-        return auth()->deny("You don't have permission to view this recored.");
+        if (!auth()->authorized()) {
+            httpReponseError('Unauthorized Access!', 401);
+        }
+        return auth()->allow();
     }
 
     public function canView($user, $model){
-        $role = $this->user->find($user->id)->role;
-        if ($role)
-            return
-                $role->permission->is_admin === '1'
-                ? auth()->allow() : (in_array('view', explode(',', $role->permission->settings))?auth()->allow()
-                :auth()->deny("You don't have permission to view this recored."));
-        return auth()->deny("You don't have permission to view this recored.");
+        if (!auth()->authorized()) {
+            httpReponseError('Unauthorized Access!', 401);
+        }
+        return auth()->allow();
     }
 
     public function canUpdate($user, $model){
-        $role = $this->user->find($user->id)->role;
-        if ($role)
-            return
-                $role->permission->is_admin === '1'
-                ? auth()->allow() : (in_array('update', explode(',', $role->permission->settings))?auth()->allow()
-                :auth()->deny("You don't have permission to update this record."));
-        return auth()->deny("You don't have permission to update this record.");
+        if (!auth()->authorized()) {
+            httpReponseError('Unauthorized Access!', 401);
+        }
+        return auth()->allow();
     }
 }
