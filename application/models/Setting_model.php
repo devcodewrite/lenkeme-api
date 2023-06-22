@@ -13,6 +13,11 @@ class Setting_model extends CI_Model
         return $default;
     }
 
+    public function all()
+    {
+        return $this->db->get_where($this->table)->result();
+    }
+
     public function set(string $key, string $value = '')
     {
         $data = [
@@ -21,6 +26,8 @@ class Setting_model extends CI_Model
         ];
         return $this->db->replace($this->table, $data);
     }
+
+
 
     public function toAvatar($url = null, $model = null)
     {
