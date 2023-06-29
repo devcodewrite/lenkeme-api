@@ -30,7 +30,7 @@ class Post_model extends CI_Model
 
         if ($this->db->insert($this->table, $data)) {
             $id = $this->db->insert_id();
-            $this->update($id, []); // uploads and update images
+            $this->update($id, $record); // uploads and update images
             return $this->find($id);
         }
     }
@@ -45,7 +45,6 @@ class Post_model extends CI_Model
         if(sizeof($record) === 0) return;
 
         $data = $this->extract($record);
-        $post = $this->find($id);
 
         if (isset($_FILES['images'])) {
             $files = $_FILES; // save for later
