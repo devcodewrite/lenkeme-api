@@ -108,7 +108,7 @@ class User_model extends CI_Model
         }
 
         if (isset($record['username'])) {
-            $user  = $this->find($id);
+            $user  = $this->find2($id);
             $today = new DateTime('now');
             $lasttime = new DateTime($user->username_updated_at);
             if (
