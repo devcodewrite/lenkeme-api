@@ -9,7 +9,8 @@ class User_model extends CI_Model
         'token',
         'otp_code',
         'password',
-        'deleted_at'
+        'deleted_at',
+        'username_updated_at'
     ];
 
     public function create(array $record)
@@ -102,8 +103,23 @@ class User_model extends CI_Model
             unset($record['password']); // ensure no empty password update
         }
 
-        if(isset($record['jobs'])){
-            $this->userjob->create(['jobs'=>$record['jobs'], 'user_id'=>$id]);
+        if (isset($record['jobs'])) {
+            $this->userjob->create(['jobs' => $record['jobs'], 'user_id' => $id]);
+        }
+
+        if (isset($record['username'])) {
+            $user  = $this->find($id);
+            $today = new DateTime('now');
+            $lasttime = new DateTime($user->username_updated_at);
+            if (
+                $lasttime->diff($today)->days <= 30
+                && $user->username_updated_at !== null
+            ) {
+                $this->session->set_flashdata('error_message', $lasttime->diff($today)->days . " days left before you can change your username!");
+                $this->session->set_flashdata('error_code', 17);
+                return false;
+            }
+            $record['username_updated_at'] = date("Y-m-d H:i:s");
         }
 
         if (isset($_FILES['photo'])) {
@@ -112,13 +128,13 @@ class User_model extends CI_Model
         }
 
         if (isset($_FILES['cover_photo'])) {
-            $path = $this->uploadPhoto($id,'cover_photo');
+            $path = $this->uploadPhoto($id, 'cover_photo');
             $record['cover_photo_url'] = $path;
         }
 
         $data = $this->extract($record);
 
-        if(sizeof($data) === 0) return $this->find($id);
+        if (sizeof($data) === 0) return $this->find($id);
         $this->db->set($data);
         $this->db->where('id', $id);
         $this->db->update($this->table);
