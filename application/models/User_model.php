@@ -227,6 +227,24 @@ class User_model extends CI_Model
     }
 
     /**
+     * Get user by id
+     */
+    public function find2(int $id = null)
+    {
+        if (!$id) return;
+
+        $where = [
+            'id' => $id,
+            "deleted_at" => null
+        ];
+        $user = $this->all2()->where($where)->get()->row();
+
+        if (!$user) return false;
+        $user->jobs = $this->userjob->find($user->id);
+        return $user;
+    }
+
+    /**
      * Get users by column where cluase
      */
     public function where(array $where)
