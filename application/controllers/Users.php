@@ -209,7 +209,7 @@ class Users extends MY_Controller
         $inputs = $this->input->get();
         $query = $this->post->all();
 
-        $where = [];
+        $where = ['user_posts.user_id' => $user->id];
 
         if ($auser) {
             $query->group_start();
