@@ -99,7 +99,7 @@ class Usersubscription_model extends CI_Model
         $rtable = "subscriptions";
         $col = "subscription_id";
 
-        $where = ["{$this->table}.deleted_at =" => null];
+        $where = ["$rtable.deleted_at =" => null];
         $fields = [
             "{$this->table}.uuid as user_uuid",
             "{$this->table}.start_at",
@@ -128,7 +128,7 @@ class Usersubscription_model extends CI_Model
         $rtable = "subscriptions";
         $col = "subscription_id";
 
-        $where = ["{$this->table}.deleted_at =" => null];
+        $where = ["$rtable.deleted_at =" => null];
         $fields = [
             "{$this->table}.uuid as user_uuid",
             "{$this->table}.start_at",
