@@ -291,7 +291,7 @@ class Account extends MY_Controller
      */
     public function my_subscriptions()
     {
-        $gate = auth()->can('viewAny', 'usersub');
+        $gate = auth()->can('viewAny', 'usersubs');
         if ($gate->denied()) {
             $out = [
                 'status' => false,
@@ -305,7 +305,7 @@ class Account extends MY_Controller
         $page = $this->input->get('page');
         $length = $this->input->get('length');
         $inputs = $this->input->get();
-        $query = $this->usersub->all();
+        $query = $this->usersubs->all();
         $where = ['user_id' => $user->id];
 
         $query->where($where);
