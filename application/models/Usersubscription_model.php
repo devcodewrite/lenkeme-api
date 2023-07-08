@@ -105,12 +105,11 @@ class Usersubscription_model extends CI_Model
             "{$this->table}.start_at",
             "{$this->table}.expire_at",
             "{$this->table}.user_id",
-            "{$rtable}.*",
         ];
 
-        foreach ($this->db->field_data($this->table) as $field_data) {
+        foreach ($this->db->field_data($rtable) as $field_data) {
             if (in_array($field_data->name, $this->hidden)) continue; // skip hidden fields
-            array_push($fields, "{$this->table}.$field_data->name");
+            array_push($fields, "$rtable.$field_data->name");
         }
 
         return
