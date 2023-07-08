@@ -6,7 +6,8 @@ class Usersubscription_model extends CI_Model
     public $table = 'user_subscriptions';
 
     public $hidden = [
-        'deleted_at'
+        'deleted_at',
+        'updated_at',
     ];
 
     public function create(array $record)
@@ -47,7 +48,7 @@ class Usersubscription_model extends CI_Model
         $role = $this->find($id);
         if ($this->perm->delete($role->permission_id))
             return $this->db->delete($this->table, ['id' => $id]);
-        
+
         return false;
     }
 
@@ -78,7 +79,7 @@ class Usersubscription_model extends CI_Model
             'id' => $id,
         ];
         $user_subscription = $this->all()->where($where)->get()->row();
-        if(!$user_subscription) return false;
+        if (!$user_subscription) return false;
         return $user_subscription;
     }
 
@@ -95,8 +96,17 @@ class Usersubscription_model extends CI_Model
      */
     public function all()
     {
+        $rtable = "subscriptions";
+        $col = "subscription_id";
+
         $where = ["{$this->table}.deleted_at =" => null];
-        $fields = [];
+        $fields = [
+            "{$this->table}.uuid as user_uuid",
+            "{$this->table}.start_at",
+            "{$this->table}.expire_at",
+            "{$this->table}.user_id",
+            "{$rtable}.*",
+        ];
 
         foreach ($this->db->field_data($this->table) as $field_data) {
             if (in_array($field_data->name, $this->hidden)) continue; // skip hidden fields
@@ -106,46 +116,61 @@ class Usersubscription_model extends CI_Model
         return
             $this->db->select($fields, true)
             ->from($this->table)
+            ->join($rtable, "$rtable.id={$this->table}.$col")
             ->where($where);
     }
 
-      /**
+    /**
      * Get all user_subscriptions
      */
     public function all2()
     {
-        $where = ["{$this->table}.deleted_at =" => null];
-        $fields = [];
+        $rtable = "subscriptions";
+        $col = "subscription_id";
 
+        $where = ["{$this->table}.deleted_at =" => null];
+        $fields = [
+            "{$this->table}.uuid as user_uuid",
+            "{$this->table}.start_at",
+            "{$this->table}.expire_at",
+            "{$this->table}.user_id",
+            "{$rtable}.*",
+        ];
         return
             $this->db->select($fields, true)
             ->from($this->table)
+            ->join($rtable, "$rtable.id={$this->table}.$col")
             ->where($where);
     }
 
-    public function canViewAny($user){
+    public function canViewAny($user)
+    {
         return auth()->allow();
     }
 
-    public function canView($user, $model){
+    public function canView($user, $model)
+    {
         return auth()->allow();
     }
 
-    public function canCreate($user){
+    public function canCreate($user)
+    {
         if (!auth()->authorized()) {
             httpReponseError('Unauthorized Access!', 401);
         }
         return auth()->allow();
     }
 
-    public function canUpdate($user, $model){
+    public function canUpdate($user, $model)
+    {
         if (!auth()->authorized()) {
             httpReponseError('Unauthorized Access!', 401);
         }
         return auth()->allow();
     }
 
-    public function canDelete($user, $model){
+    public function canDelete($user, $model)
+    {
         if (!auth()->authorized()) {
             httpReponseError('Unauthorized Access!', 401);
         }
