@@ -284,4 +284,43 @@ class Account extends MY_Controller
         ];
         httpResponseJson($out);
     }
+
+    /**
+     * Show a list of subscription resources
+     * @return http json
+     */
+    public function my_subscriptions()
+    {
+        $gate = auth()->can('viewAny', 'usersub');
+        if ($gate->denied()) {
+            $out = [
+                'status' => false,
+                'message' => $gate->message
+            ];
+            httpReponseError($out, 401);
+            return;
+        }
+        $user = auth()->user();
+
+        $page = $this->input->get('page');
+        $length = $this->input->get('length');
+        $inputs = $this->input->get();
+        $query = $this->usersub->all();
+        $where = ['user_id' => $user->id];
+
+        $query->where($where);
+
+        $out = json($query, $page, $length, $inputs);
+        if ($out)
+            $out = array_merge($out, [
+                'input' => $this->input->get(),
+            ]);
+        else  $out = [
+            'status' => false,
+            'input' => $this->input->get(),
+        ];
+        httpResponseJson($out);
+    }
+
+    
 }
