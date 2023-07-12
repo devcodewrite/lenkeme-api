@@ -108,6 +108,11 @@ class User_model extends CI_Model
         }
 
         if (isset($record['username'])) {
+            if ($this->user->where(['username' => $record['username']])->num_rows() > 0) {
+                $this->session->set_flashdata('error_message', "We already have account with the username " . $record['username']);
+                $this->session->set_flashdata('error_code', 18);
+                return false;
+            }
             $user  = $this->find2($id);
             $today = new DateTime('now');
             $lasttime = new DateTime($user->username_updated_at);
@@ -123,6 +128,15 @@ class User_model extends CI_Model
             }
             $record['username_updated_at'] = date("Y-m-d H:i:s");
         }
+
+        if (isset($record['phone'])) {
+            if ($this->user->where(['phone' => $record['phone']])->num_rows() > 0) {
+                $this->session->set_flashdata('error_message', "We already have account with the phone " . $record['phone']);
+                $this->session->set_flashdata('error_code', 19);
+                return false;
+            }
+            $record['phone_verified_at'] = null;
+        } 
 
         if (isset($_FILES['photo'])) {
             $path = $this->uploadPhoto($id);
