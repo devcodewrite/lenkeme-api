@@ -188,8 +188,8 @@ class Auth extends MY_Controller
         $where = [
             'phone' => $record['phone'],
         ];
-        $user  = $this->user->all2()
-            ->select(['otp_code'])
+        $user  = $this->user->all()
+            ->select(['otp_code','new_phone'])
             ->where($where)
             ->get()
             ->row();
