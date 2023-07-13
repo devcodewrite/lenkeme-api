@@ -134,6 +134,13 @@ class User_model extends CI_Model
                 $this->session->set_flashdata('error_code', 19);
                 return false;
             }
+            $user = $this->all2()->where("{$this->table}.id", $id)->get()->row();
+            if (!password_verify($record['confirm_password'], $user->password)) {
+                $this->session->set_flashdata('error_message', "Invalid password!");
+                $this->session->set_flashdata('error_code', 20);
+                return false;
+            }
+
             $record['phone_verified_at'] = null;
         } 
 
