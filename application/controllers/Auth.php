@@ -212,6 +212,7 @@ class Auth extends MY_Controller
         }
         $data = [
             'phone_verified_at' => date('Y-m-d H:i:s', strtotime('now Africa/Accra')),
+            'phone' => $user->new_phone ? $user->new_phone : $user->phone,
             'otp_code' => null,
         ];
 
