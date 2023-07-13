@@ -10,7 +10,9 @@ class User_model extends CI_Model
         'otp_code',
         'password',
         'deleted_at',
-        'username_updated_at'
+        'username_updated_at',
+        'new_phone',
+        'new_country_data'
     ];
 
     public function create(array $record)

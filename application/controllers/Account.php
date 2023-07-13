@@ -98,7 +98,11 @@ class Account extends MY_Controller
 
             if ($userjobs) {
                 unset($record['user_id']);
-                $user = $this->user->update($user->id, array_merge($record, ['user_type' => 'artisan']));
+                $ud = array_merge($record, ['user_type' => 'artisan']);
+                if(!$user->photo_url){
+                    $ud = array_merge($ud, ['photo_url' => $userjobs[0]->avatar]);
+                }
+                $user = $this->user->update($user->id,$ud);
             }
             if ($userjobs) {
                 $out = [
