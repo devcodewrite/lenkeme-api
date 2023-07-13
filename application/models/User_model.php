@@ -130,9 +130,9 @@ class User_model extends CI_Model
             $record['username_updated_at'] = date("Y-m-d H:i:s");
         }
 
-        if (isset($record['phone'])) {
-            if ($this->user->where(['phone' => $record['phone']])->num_rows() > 0) {
-                $this->session->set_flashdata('error_message', "We already have account with the phone number: " . $record['phone']);
+        if (isset($record['new_phone'])) {
+            if ($this->user->where(['phone' => $record['new_phone']])->num_rows() > 0) {
+                $this->session->set_flashdata('error_message', "We already have account with the phone number: " . $record['new_phone']);
                 $this->session->set_flashdata('error_code', 19);
                 return false;
             }
