@@ -189,7 +189,7 @@ class Auth extends MY_Controller
             'phone' => $record['phone'],
         ];
         $user  = $this->user->all()
-            ->select(['otp_code','new_phone'])
+            ->select(['otp_code','new_phone', 'new_country_data'])
             ->where($where)
             ->get()
             ->row();
@@ -213,7 +213,9 @@ class Auth extends MY_Controller
         $data = [
             'phone_verified_at' => date('Y-m-d H:i:s', strtotime('now Africa/Accra')),
             'phone' => $user->new_phone ? $user->new_phone : $user->phone,
+            'country_data' => $user->new_country_data ? $user->new_country_data : $user->country_data,
             'new_phone' => null,
+            'new_country_data' => null,
             'otp_code' => null,
         ];
 
