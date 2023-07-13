@@ -146,6 +146,15 @@ class User_model extends CI_Model
             $record['phone_verified_at'] = null;
         } 
 
+        if (isset($record['email'])) {
+            if ($this->user->where(['email' => $record['email']])->num_rows() > 0) {
+                $this->session->set_flashdata('error_message', "We already have account with the email: " . $record['email']);
+                $this->session->set_flashdata('error_code', 21);
+                return false;
+            }
+            $record['email_verified_at'] = null;
+        } 
+
         if (isset($_FILES['photo'])) {
             $path = $this->uploadPhoto($id);
             $record['photo_url'] = $path;
