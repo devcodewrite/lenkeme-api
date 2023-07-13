@@ -23,6 +23,8 @@ class Setting_model extends CI_Model
 
     public function all()
     {
+        $fields = [];
+        
         foreach ($this->db->field_data($this->table) as $field_data) {
             if (in_array($field_data->name, $this->hidden)) continue; // skip hidden fields
             array_push($fields, "{$this->table}.$field_data->name");
