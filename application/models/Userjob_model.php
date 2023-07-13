@@ -27,7 +27,10 @@ class Userjob_model extends CI_Model
             $this->db->insert_batch($this->table, $data2);
             return $this->db->affected_rows() > 0;
         }
-        return $this->db->insert($this->table, $data);
+       if($this->db->insert($this->table, $data)){
+        return $this->find($record['user_id']);
+       }
+       return false;
     }
 
     /**
