@@ -121,7 +121,6 @@ class User_model extends CI_Model
                 && $user->username_updated_at !== null
             ) {
                 $daysleft = 30 - $lasttime->diff($today)->days;
-
                 $this->session->set_flashdata('error_message', "$daysleft days left before you can change your username!");
                 $this->session->set_flashdata('error_code', 17);
                 return false;

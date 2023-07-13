@@ -9,7 +9,8 @@ class Settings extends MY_Controller
    */
   public function index()
   {
-    $setting = $this->setting->all();
+    $w = $this->input->get();
+    $setting = $this->setting->all()->where($w)->get()->result();
     if ($setting) {
       $out = [
         'data' => $setting,
