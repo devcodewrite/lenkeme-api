@@ -213,6 +213,7 @@ class Auth extends MY_Controller
         $data = [
             'phone_verified_at' => date('Y-m-d H:i:s', strtotime('now Africa/Accra')),
             'phone' => $user->new_phone ? $user->new_phone : $user->phone,
+            'new_phone' => null,
             'otp_code' => null,
         ];
 
@@ -267,7 +268,7 @@ class Auth extends MY_Controller
             $temp = 'Hi {$firstname}, your OTP code is: {$code}. Do not share this with anyone.';
             $sms = $this->sms->sendPersonalised($temp, [
                 [
-                    'phone' => $user->phone,
+                    'phone' => $record['new_phone'],
                     'firstname' => $user->display_name,
                     'code' => $otp
                 ]
