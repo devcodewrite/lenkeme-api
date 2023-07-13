@@ -23,9 +23,9 @@ class User_model extends CI_Model
 
         $data = $this->extract($record);
 
-        if ($this->user->where(['phone' => $record['new_phone']])->row()) {
-            $pat1 = substr($record['new_phone'], 0, 2);
-            $pat2 = substr($record['new_phone'], 8, 2);
+        if ($this->user->where(['phone' => $record['phone']])->row()) {
+            $pat1 = substr($record['phone'], 0, 2);
+            $pat2 = substr($record['phone'], 8, 2);
             $this->session->set_flashdata('error_message', "You already have account with this phone number $pat1***$pat2");
             $this->session->set_flashdata('error_code', 2);
             return false;
